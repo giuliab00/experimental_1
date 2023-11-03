@@ -33,7 +33,7 @@ srv_ask_pixels = None
 robot_pose_sub = None
 movement = None
 
-class NavLogRobot:
+class NavLogNode:
 
     def __init__(self):
 
