@@ -71,7 +71,7 @@ Define a class for navigation logic:
             If well aligned:
                 Move to state 1 for distance control
 
-    Main routine function:
+    Routine function:
         List of marker IDs
 
         Until there are markers to reach:
