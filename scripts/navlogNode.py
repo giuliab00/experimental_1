@@ -66,7 +66,6 @@ class NavLogNode:
 
 	#Callback for markerPose subscription
 	def clbk_vision(self, msg):
-		rospy.loginfo("Got distance from vision")
 		#acknowledge
 		self.ack = msg.ack
 		#distanza se <200 vado avanti
@@ -85,27 +84,25 @@ class NavLogNode:
 				else:
 					self.state = 1
 			else:
-				cmd = Twist()
+				cmd = Twist()				
 				cmd.angular.z = 0.1
 				self.cmd_pub.publish(cmd)
 
 		#stato 1 controllo distanza
-		if self.state == 1:
-			rospy.loginfo("State 1")
+		if self.state == 1:			
 			if self.distance < 200 :
 				#dobbiamo andare avanti piano piano
 				#matte metti il controllo
 				cmd = Twist()
 				cmd.linear.x = 0.1
 				self.cmd_pub.publish(cmd)
-			else:				
-				self.state = 0
+			else:
 				cmd = Twist()
 				self.cmd_pub.publish(cmd)
+				self.state = 0				
 
 		#stato 2 correzione errore
 		if self.state == 2:
-			rospy.loginfo("State 2")
 			if self.angle < -40:
 				#controllo giro verso dx
 				cmd = Twist()
@@ -118,21 +115,26 @@ class NavLogNode:
 				self.cmd_pub.publish(cmd)
 			else:
 				self.state = 1
+				
 
 # Main routine
 	def routine(self):
 		#lista marker
-		marker_list = [0,11,12,13,15]
-		marker_list.pop(0)
+		marker_list = [11,12,13,15]
 		#while lista piena
-		rospy.loginfo("Inizio...")
+		rospy.loginfo("Starting...")
 		while(marker_list):
 			#publish marker id
 			self.pub_marker_id.publish(marker_list[0])
-			rospy.loginfo("Sent %d" % marker_list[0])
-			#settiamo statpo a 0
+			rospy.loginfo("Sent marker ID: %d" % marker_list[0])
+			#settiamo stato a 0
 			self.state = 0
-			rospy.loginfo("State 0")
+			cmd = Twist()
+			cmd.linear.x = -0.1
+			self.cmd_pub.publish(cmd)
+			time.sleep(1)
+			cmd.linear.x = 0
+			self.cmd_pub.publish(cmd)
 			#while marker not found
 			while(self.distance < 200):
 				#change state
@@ -141,6 +143,9 @@ class NavLogNode:
 			marker_list.pop(0)
 			self.ack = False
 			self.distance = 0
+		cmd = Twist()
+		cmd.angular.z = 5
+		self.cmd_pub.publish(cmd)
 			
 	def clbk_odom(self, msg):
 		
@@ -171,6 +176,7 @@ def main():
 	spin_thread.start()
 
 	# Start the logic node routine
+	time.sleep(1)
 	logic.routine()
 
 	# On shutdown...
