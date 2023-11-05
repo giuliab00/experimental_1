@@ -52,3 +52,6 @@ Here it is possible to find the video showing respectively the behaviour with th
 video1\
 and the real robot\
 video2
+
+Drawback and Possible improvements
+-------------------------
