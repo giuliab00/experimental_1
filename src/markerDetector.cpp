@@ -147,6 +147,7 @@ class MarkerDetector {
 		void find_marker_callback(const std_msgs::Int32 &msg) {
 				/*TODO: Change to a service...*/
 				actual_marker_id_ = msg.data;
+				ROS_INFO("Belin mi è arrivata una richiesta marker %d", msg.data);
 				
 		}
 		  

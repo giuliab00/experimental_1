@@ -112,7 +112,7 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES experimental_1
 # CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs
-  DEPENDS system_lib std_msgs
+#  DEPENDS system_lib std_msgs
 )
 
 ###########

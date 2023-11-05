@@ -8,15 +8,12 @@ from experimental_1.msg import markerDistance
 from tf import transformations
 from geometry_msgs.msg import Pose2D, Twist
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Bool, Float32
+from std_msgs.msg import Bool, Float32, Int32
 from threading import Thread
 import math
+import time
 
 goal_position = Pose2D()
-current_pose = Pose2D()
-current_pose.x = 0.0
-current_pose.y = 0.0
-current_pose.theta = 0.0
 
 MarkerID = 11
 Kp_d = 0.2
@@ -35,96 +32,150 @@ movement = None
 
 class NavLogNode:
 
-    def __init__(self):
+	def __init__(self):
 
-        #init node
-        rospy.init_node("navlogNode")
+		#init node
+		rospy.init_node("navlogNode")
+		#init var
+		self.distance = 0.0
+		self.angle = 0.0
+		self.ack = False
+		self.state = 0
+		self.current_pose = Pose2D()
+		
+		#parameters for control
+		self.Kp_d = 0.2
+		self.Kp_a = 0.2
+		self.limit_vel = 0.6
+		self.limit_wl = 0.6
+		self.limit_wr = -0.5
+		self.dist_threshold = 0.07
+		self.ang_threshold = 0.08
 
-        #init var
-        self.distance = 0.0
-        self.angle = 0.0
-        self.ack = False
-        self.state = 0
+		# Publish marker ID goal
+		self.pub_marker_id = rospy.Publisher("/requestMarkerId", Int32, queue_size=10)
 
-        # Publish marker ID goal
-        self.pub_marker_id = rospy.Publisher("/requestMarkerId", Int32, queue_size=10)
+		#Publisher for /cmd_vel
+		self.cmd_pub = rospy.Publisher('/cmd_vel', Twist, queue_size = 1)
 
-        # Subscribe to the topic for goal position from marker detection
-        self.sub_marker_dist = rospy.Subscriber("/requestMarkerId", markerDistance, self.clbk_vision)
-        
-    
-    # Callback for markerPose subscription
-    def clbk_vision(self, msg):
-        rospy.loginfo("Got distance from vision")
-        #acknowledge
-        self.ack = msg.ack
-        #distanza se <200 vado avanti
-        self.distance = msg.l_pixel
-        #angolo deve arrivare a 40 o -40
-        self.angle = msg.centerDistance
+		# Subscribe to the topic for goal position from marker detection
+		self.sub_marker_dist = rospy.Subscriber("/markerDistance", markerDistance, self.clbk_vision)
+		
+		#Subscribe to /odom
+		self.odom_sub = rospy.Subscriber("/odom", Odometry, self.clbk_odom)
 
-    def change_state(self):
-        #stato 0 rotazione
-        if self.state == 0:
-            #controllo ruoto su me stesso
-            if self.ack:
-                #misalignment da lontano è sui 20 e nella distanza giusta è circa 40 
-                if ((self.angle < -40) or (self.angle > 40)):
-                    self.state = 2 
-                else:
-                    self.state = 1
+	#Callback for markerPose subscription
+	def clbk_vision(self, msg):
+		rospy.loginfo("Got distance from vision")
+		#acknowledge
+		self.ack = msg.ack
+		#distanza se <200 vado avanti
+		self.distance = msg.l_pixel
+		#angolo deve arrivare a 40 o -40
+		self.angle = msg.centerDistance
 
-        #stato 1 controllo distanza
-        if self.state == 1:
-            if self.distance < 200 :
-                #dobbiamo andare avanti piano piano
-                #matte metti il controllo
-            else:
-                #remove marke from marker list
-                #ricominiciamo a ruotare
-                self.state = 0
-                #mandiamo nuovo markereId
-                #pub
+	def change_state(self):
+		#stato 0 rotazione
+		if self.state == 0:
+			#controllo ruoto su me stesso
+			if self.ack:
+				#misalignment da lontano è sui 20 e nella distanza giusta è circa 40 
+				if ((self.angle < -40) or (self.angle > 40)):
+					self.state = 2
+				else:
+					self.state = 1
+			else:
+				cmd = Twist()
+				cmd.angular.z = 0.1
+				self.cmd_pub.publish(cmd)
 
-        #stato 2 correzione errore
-        if self.state == 2:
-            if self.angle < -40:
-               #controllo giro verso dx
-               #  
-            elif self.angle > 40:
-                #controllo giro verso sx
-               
+		#stato 1 controllo distanza
+		if self.state == 1:
+			rospy.loginfo("State 1")
+			if self.distance < 200 :
+				#dobbiamo andare avanti piano piano
+				#matte metti il controllo
+				cmd = Twist()
+				cmd.linear.x = 0.1
+				self.cmd_pub.publish(cmd)
+			else:				
+				self.state = 0
+				cmd = Twist()
+				self.cmd_pub.publish(cmd)
+
+		#stato 2 correzione errore
+		if self.state == 2:
+			rospy.loginfo("State 2")
+			if self.angle < -40:
+				#controllo giro verso dx
+				cmd = Twist()
+				cmd.angular.z = -0.1
+				self.cmd_pub.publish(cmd)  
+			elif self.angle > 40:
+				#controllo giro verso sx
+				cmd = Twist()
+				cmd.angular.z = 0.1
+				self.cmd_pub.publish(cmd)
+			else:
+				self.state = 1
+
 # Main routine
-    def routine(self):
-        #lista marker
-        #while lista piena
-            #publish marker id
-            #settiamo statpo a 0
-            #while marker not found
-                #change state
-                # tolgo marker dalla lista
+	def routine(self):
+		#lista marker
+		marker_list = [0,11,12,13,15]
+		marker_list.pop(0)
+		#while lista piena
+		rospy.loginfo("Inizio...")
+		while(marker_list):
+			#publish marker id
+			self.pub_marker_id.publish(marker_list[0])
+			rospy.loginfo("Sent %d" % marker_list[0])
+			#settiamo statpo a 0
+			self.state = 0
+			rospy.loginfo("State 0")
+			#while marker not found
+			while(self.distance < 200):
+				#change state
+				self.change_state()
+			#tolgo marker dalla lista
+			marker_list.pop(0)
+			self.ack = False
+			self.distance = 0
+			
+	def clbk_odom(self, msg):
+		
+		# We retrieve data from the '/odom' topic about the robot's current position
+		self.current_pose.x = msg.pose.pose.position.x
+		self.current_pose.y = msg.pose.pose.position.y
+		
+		# We retrieve data from the '/odom' topic about the robot's current orientation
+		quaternion = (msg.pose.pose.orientation.x,
+					msg.pose.pose.orientation.y,
+					msg.pose.pose.orientation.z,
+					msg.pose.pose.orientation.w)
+		
+		euler = transformations.euler_from_quaternion(quaternion)
+		
+		self.current_pose.theta = euler[2]
 
-        
 # Main function
 def main():
-    # Wait for other nodes to initialize properly
-    time.sleep(1)
+	# Wait for other nodes to initialize properly
+	time.sleep(1)
 
-    # Create and spin the controller node
-    logic = NavLogNode()
+	# Create and spin the controller node
+	logic = NavLogNode()
 
-    # Spinning thread to ensure that ROS callbacks are executed
-    spin_thread = Thread(target=rospy.spin)
-    spin_thread.start()
+	# Spinning thread to ensure that ROS callbacks are executed
+	spin_thread = Thread(target=rospy.spin)
+	spin_thread.start()
 
-    # Start the logic node routine
-    logic.routine()
+	# Start the logic node routine
+	logic.routine()
 
-    # On shutdown...
-    rospy.loginfo("Shutdown logic node...")
+	# On shutdown...
+	rospy.loginfo("Shutdown logic node...")
 
 if __name__ == '__main__':
-    main()
+	main()
 
-    
-        
