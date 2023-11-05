@@ -30,7 +30,70 @@ little explanation
 
 ```python
 
-    pseudocode
+Initialize ROS node
+
+Define constants and variables
+
+Initialize ROS publishers, subscribers and variables
+
+Define a class for navigation logic:
+
+    Initialize variables for distance, angle, acknowledgment and state
+    Set control parameters
+    Initialize publishers and subscribers
+
+    Callback for markerPose subscription:
+        Acknowledge marker detection
+        Update distance and angle
+
+    Change state function:
+        State 0: Rotation
+            If marker is detected:
+                If there is misalignment:
+                    Move to state 2 for correction
+                Else:
+                    Move to state 1 for distance control
+            If marker is NOT detected:
+                Robot turn on itself
+
+        State 1: Distance control
+            If robot too far from marker:
+                Move forward
+            Else:
+                Stop
+                Move to state 0 for rotation waiting for the next marker
+
+        State 2: Error correction
+            If misaligned to the left:
+                Turn clockwise
+            If misaligned to the right:
+                Turn counter-clockwise
+            If well aligned:
+                Move to state 1 for distance control
+
+    Main routine function:
+        List of marker IDs
+
+        Until there are markers to reach:
+            Publish marker ID
+            Set state 0
+            Move backward to better see the marker
+            Stop
+            Until the marker is not reached:
+                Iterate the control
+
+            Remove the reached token from the list
+            Set the control values
+
+        When finished, the robot spins
+
+Main:
+    
+    Wait for other nodes to initialize properly
+    Create and spin the controller node
+    Spinning thread to ensure that ROS callbacks are executed
+    Start the logic node routine
+    On shutdown log a message
 
 ```
 
@@ -44,7 +107,7 @@ little explanation
 
 Simulation VS Real World
 -------------------------
-
+Differencies in the real world implementation
 
 Video
 ----------------------
@@ -55,3 +118,4 @@ video2
 
 Drawback and Possible improvements
 -------------------------
+Transformation matrix !!!
