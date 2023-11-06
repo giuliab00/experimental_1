@@ -97,11 +97,54 @@ Main:
 
 ```
 
-### markerdetection
+### markerDetector Node
 
 ```cpp
 
-    pseudocode
+Inclue needed library
+Define a MarkerDetector Class {
+    initialize variable for aruco marker detection (detector, marker size, camera parameter), CV image,  
+    Initialize publishers and subscriber
+
+    image_callback function {
+
+        create a cv_bridge
+        try{
+            copy image
+            get center of the camera
+            clear detected_markers list
+            detect marker
+            for(marker in detected_markers){
+                draw detected marker on image
+                if(marker.id == marker_to_ found.id){
+                    get center of the marker
+                    compute distance among marker and camera center
+                    compute marker size dimension in pixel
+                    set msg field
+                    pusblish(msg)
+                }
+            }
+            Visualize Camera POV 
+        }
+        catch{
+            error
+        }
+    }
+
+    find_marker callback function(){
+        set the id of the marker to found to the received one
+    }
+
+    camera_info callback function() {
+        set the Aruco Camera Parameter from camera info
+   }
+
+}
+main(){
+    init ros Node
+    create markerDetector node
+    ros spin node
+}
 
 ```
 
