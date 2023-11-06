@@ -103,7 +103,7 @@ Main:
 
 Inclue needed library
 Define a MarkerDetector Class {
-    initialize variable for aruco marker detection (detector, marker size, camera parameter), CV image,  
+    Initialize variable for aruco marker detection (detector, marker size, camera parameter), CV image,  
     Initialize publishers and subscriber
 
     image_callback function {
