@@ -117,7 +117,7 @@ Define a MarkerDetector Class {
                 draw detected marker on image
                 if(marker.id == marker_to_ found.id){
                     get center of the marker
-                    compute distance among marker and camera center
+                    compute distance between marker and camera center along x axis
                     compute marker size dimension in pixel
                     set msg field
                     pusblish(msg)
