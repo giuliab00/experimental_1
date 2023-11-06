@@ -107,7 +107,6 @@ Define a MarkerDetector Class {
     Initialize publishers and subscriber
 
     image_callback() function {
-
         create a cv_bridge
         try{
             copy image
