@@ -99,14 +99,14 @@ Main:
 
 ### markerDetector Node
 
-```    python
+```    cpp
 
 Inclue needed library
 Define a MarkerDetector Class {
     Initialize variable for aruco marker detection (detector, marker size, camera parameter), CV image,  
     Initialize publishers and subscriber
 
-    image_callback function {
+    image_callback() function {
 
         create a cv_bridge
         try{
@@ -131,11 +131,11 @@ Define a MarkerDetector Class {
         }
     }
 
-    find_marker callback function(){
+    find_marker_callback() function{
         set the id of the marker to found to the received one
     }
 
-    camera_info callback function() {
+    camera_info_callback() function {
         set the Aruco Camera Parameter from camera info
    }
 
