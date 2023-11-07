@@ -26,7 +26,7 @@ In order to achieve the solution it has been thpought of the following architect
 image architecthure\
 little explanation
 
-### navlog
+### navlog Node
 
 ```python
 
