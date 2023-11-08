@@ -92,7 +92,7 @@ class NavLogNode:
             else:
                 # Robot turn on itself
                 cmd = Twist()
-                cmd.angular.z = 0.1
+                cmd.angular.z = 0.2
                 self.cmd_pub.publish(cmd)
 
         # State 1: Distance control
@@ -163,8 +163,12 @@ class NavLogNode:
             self.distance = 0
         #When finished Robot spin 
         cmd = Twist()
-        cmd.angular.z = 5
+        cmd.angular.z = 3
         self.cmd_pub.publish(cmd)
+        time.sleep(5)
+        cmd.angular.z = 0
+        self.cmd_pub.publish(cmd)
+        
 
     def clbk_odom(self, msg):
         # Retrieve robot's current position and orientation from /odom topic
