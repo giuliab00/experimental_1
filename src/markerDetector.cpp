@@ -44,6 +44,7 @@ class MarkerDetector {
 		double marker_size_ = marker_real_size_;
 		// ?
 		bool useCamInfo_ ;
+		bool isCameraCompressed;
 		//CV image
 		cv::Mat inImage_;
 		//id of the marker to find
@@ -70,12 +71,13 @@ class MarkerDetector {
 		MarkerDetector() :
 			nh_("~"), it_(nh_), useCamInfo_(true) 
 		{
-			//create the subscribe to camera image
+			//create the subscribe to camera image /camera/color/image_raw/compressed
 			image_sub_ = it_.subscribe("/camera/color/image_raw",1, &MarkerDetector::image_callback, this);
 			//create subscriber to camera info in order to set the proper Aruco Camera Parameter
 			cam_info_sub = nh_.subscribe("/camera/color/camera_info", 1, &MarkerDetector::cam_info_callback, this);
 						
 			nh_.param<bool>("use_camera_info", useCamInfo_, false);
+			nh_.param<bool>("campressed_camera", isCameraCompressed, false); //To handle the compression
 			camParam_ = aruco::CameraParameters();
 			
 			//publisher to notify NavLogic about the distance from the marker
