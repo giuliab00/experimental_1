@@ -44,7 +44,9 @@
     <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen"/>
   </group>
 	
-	
+  <!-- start the marker detector node and the logic & navigation node -->
+  <node name="markerDetector" pkg="experimental_1" type="markerDetector" output="screen" launch-prefix="xterm -e" />
+  <node name="navlogNode" pkg="experimental_1" type="navlogNode.py" output="screen" launch-prefix="xterm -e" />	
 
   <!-- these are the arguments you can pass this launch file, for example paused:=true -->
   <arg name="model" default="$(find rosbot_description)/urdf/rosbot.xacro" />
