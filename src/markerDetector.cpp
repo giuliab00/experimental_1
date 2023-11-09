@@ -49,13 +49,17 @@ class MarkerDetector {
 		cv::Mat inImage_;
 		//id of the marker to find
 		int actual_marker_id_;
+		int POV_window_b_;
 		//message to publish
 		experimental_1::markerDistance toSend;
+
+		sensor_msgs::ImagePtr outputMsg;
 		
 		//ROS pubs/subs
 		ros::NodeHandle nh_;
 		image_transport::ImageTransport it_;
 		image_transport::Subscriber image_sub_;
+		image_transport::Publisher debug_pub_;
 		
 		//Subscriber to get the camera info 	
 		ros::Subscriber cam_info_sub;	
@@ -71,13 +75,25 @@ class MarkerDetector {
 		MarkerDetector() :
 			nh_("~"), it_(nh_), useCamInfo_(true) 
 		{
+<<<<<<< HEAD
+			//create the subscribe to camera image /camera/rgb/image_raw/compressed
+			image_sub_ = it_.subscribe("/camera/rgb/image_raw",1, &MarkerDetector::image_callback, this);
+=======
 			//create the subscribe to camera image /camera/color/image_raw/compressed
 			image_sub_ = it_.subscribe("/camera/color/image_raw",1, &MarkerDetector::image_callback, this);
+>>>>>>> e5f380203add34132b6e95deb60ca1c9d16bd6ab
 			//create subscriber to camera info in order to set the proper Aruco Camera Parameter
-			cam_info_sub = nh_.subscribe("/camera/color/camera_info", 1, &MarkerDetector::cam_info_callback, this);
+			cam_info_sub = nh_.subscribe("/camera/rgb/camera_info", 1, &MarkerDetector::cam_info_callback, this);
+
+			//Pub debug
+			debug_pub_ = it_.advertise("/debug/image_raw", 1);
 						
 			nh_.param<bool>("use_camera_info", useCamInfo_, false);
+<<<<<<< HEAD
+			nh_.param<bool>("pov_window", POV_window_b_, true);
+=======
 			nh_.param<bool>("campressed_camera", isCameraCompressed, false); //To handle the compression
+>>>>>>> e5f380203add34132b6e95deb60ca1c9d16bd6ab
 			camParam_ = aruco::CameraParameters();
 			
 			//publisher to notify NavLogic about the distance from the marker
@@ -89,7 +105,7 @@ class MarkerDetector {
 			cv::namedWindow("ROSBot POV", cv::WINDOW_AUTOSIZE);	
 			
 		}
-		
+
 		void image_callback(const sensor_msgs::ImageConstPtr& msg) {
 			/*Callback function of /camera/color/image_raw
    			each time an image is published update the list of marker detected
@@ -142,11 +158,17 @@ class MarkerDetector {
 						markerPoseGoal_pub_.publish(toSend);
 					}	
 				}
+
+
 				
 				//Visualize the camera POV
-				cv::imshow("ROSBot POV", inImage_);
-				cv::waitKey(3);
-				
+				if(POV_window_b_){
+					cv::imshow("ROSBot POV", inImage_);
+					cv::waitKey(3);
+				}				
+				/*Debug publisher*/
+				outputMsg = cv_bridge::CvImage(std_msgs::Header(), sensor_msgs::image_encodings::BGR8, inImage_).toImageMsg();
+				debug_pub_.publish(outputMsg);				
 			}
 				
 			catch (cv_bridge::Exception& e)
