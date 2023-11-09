@@ -13,10 +13,10 @@ In order to run the solution it is necessary to ...
 How to run the solution
 ----------------------
 
-First of all is necessary:
+If you have followed the previous step, with this simple instruction, the simulation will be running and with it two windows will open giving informations about the nodes implemented
 
 ```bash
-
+roslaunch esperimental_1 ass1.launch
 ```
 
 
@@ -154,7 +154,11 @@ Differencies in the real world implementation
 Video
 ----------------------
 Here it is possible to find the video showing respectively the behaviour with the simulation\
-video1\
+
+
+https://github.com/giuliab00/experimental_1/assets/114100814/c17ca7f1-98aa-44b7-9c01-f45f4e1ba004
+
+
 and the real robot\
 video2
 
