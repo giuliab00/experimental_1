@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
   	<!-- Add markerDetector node -->
-  <node name="markerDetector" pkg="experimental_1" type="markerDetector" output="screen">
+  <node name="markerDetector" pkg="experimental_1" type="markerDetector" output="screen" launch-prefix="xterm -e">
    
   </node>
 
   <!-- Add navlogNode.py node -->
-  <node name="navlogNode" pkg="experimental_1" type="navlogNode.py" output="screen">
+  <node name="navlogNode" pkg="experimental_1" type="navlogNode.py" output="screen" launch-prefix="xterm -e">
     
   </node>
 

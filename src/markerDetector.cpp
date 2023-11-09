@@ -158,7 +158,7 @@ class MarkerDetector {
 				//Visualize the camera POV
 				if(POV_window_b_){
 					cv::imshow("ROSBot POV", inImage_);
-					cv::waitKey(3);
+					cv::waitKey(1);
 				}				
 				/*Debug publisher*/
 				outputMsg = cv_bridge::CvImage(std_msgs::Header(), sensor_msgs::image_encodings::BGR8, inImage_).toImageMsg();
