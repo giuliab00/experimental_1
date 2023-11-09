@@ -183,15 +183,4 @@ video2
 Drawback and Possible improvements
 -------------------------
 Transformation matrix !!!
-      Remove the reached token from the list
-            Set the control values
-
-        When finished, the robot spins
-
-Main:
-    
-    Wait for other nodes to initialize properly
-    Create and spin the controller node
-    Spinning thread to ensure that ROS callbacks are executed
-    Start the logic node routine
-    On shutdown log a message
+     
