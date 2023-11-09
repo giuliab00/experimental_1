@@ -1,30 +1,49 @@
 Assignment 1 of Experimental Robotics Laboratory
 ================================================
 
-In this assignment we are given an environment where the robot start at the point (0,0) and 4 markers with a specific meaning are placed.
+In this assignment we are given an environment where the robot starts at the point (0,0) and 4 markers with a specific meaning are placed.
 We are requested to reach all the markers by controlling the camera and the navigation of the robot. This must be done for either the simulation and the real robot.\
-Here is explained in detail the behaviour for the simulation, while at the end of this document isd possible to finde the differences with the real robot implementation.
+Here is explained in detail the behaviour for the simulation, while at the end of this document it is possible to finde the differences with the real robot implementation.
 
 How to download
 ----------------------
 
-In order to run the solution it is necessary to ...
+In order to run the solution it is necessary to execute the following commands:
+
+```bash
+git clone https://github.com/ros-perception/vision_opencv
+git checkout noetic
+```
+```bash
+git clone https://github.com/CarmineD8/aruco_ros
+```
+ move the folder **models** to .\gazebo
+
+```bash
+git clone https://github.com/husarion/rosbot_ros
+git checkout noetic
+```
+
+```bash
+git clone https://github.com/giuliab00/experimental_1
+```
 
 How to run the solution
 ----------------------
 
-If you have followed the previous step, with this simple instruction, the simulation will be running and with it two windows will open giving informations about the nodes implemented
+If you have followed the previous steps, it is possible execute this command:
 
 ```bash
 roslaunch esperimental_1 ass1.launch
 ```
-
+the simulation is now running and with it two windows are open giving informations about the nodes implemented
 
 Architecture and Pseudocode
 ----------
 In order to achieve the solution it has been thpought of the following architecture:\
-image architecthure\
-little explanation
+![architechture](https://github.com/giuliab00/experimental_1/assets/114100814/3a9b214d-0f55-450a-8bd7-8256bfce5234)
+
+Substuntially the **navlognode** is in charge of 
 
 ### navlog Node
 
@@ -153,8 +172,7 @@ Differencies in the real world implementation
 
 Video
 ----------------------
-Here it is possible to find the video showing respectively the behaviour with the simulation\
-
+Here it is possible to find the video showing respectively the behaviour with the simulation
 
 https://github.com/giuliab00/experimental_1/assets/114100814/c17ca7f1-98aa-44b7-9c01-f45f4e1ba004
 
@@ -165,3 +183,15 @@ video2
 Drawback and Possible improvements
 -------------------------
 Transformation matrix !!!
+      Remove the reached token from the list
+            Set the control values
+
+        When finished, the robot spins
+
+Main:
+    
+    Wait for other nodes to initialize properly
+    Create and spin the controller node
+    Spinning thread to ensure that ROS callbacks are executed
+    Start the logic node routine
+    On shutdown log a message
