@@ -1,5 +1,6 @@
 Assignment 1 of Experimental Robotics Laboratory
 ================================================
+Additional feature for the rotating camera. 
 
 In this assignment we are given an environment where the robot starts at the point (0,0) and 4 markers with a specific meaning are placed.
 We are requested to reach all the markers by controlling the camera and the navigation of the robot. This must be done for either the simulation and the real robot.\
