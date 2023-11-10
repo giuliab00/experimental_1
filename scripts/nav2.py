@@ -92,7 +92,8 @@ class NavLogNode:
 				#turn left					
 				cmd.angular.z = 0.05;
 			else:
-				cmd.angular.z = -0.05;
+				#go forward
+				cmd.linear.x = -0.05;
 			self.cmd_pub.publish(cmd)
 
 	def routine(self):
