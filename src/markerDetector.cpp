@@ -146,6 +146,7 @@ class MarkerDetector {
 						
 						//set msg field
 						toSend.ack = 1; 
+						toSend.marker_id = markers_[i].id;
 						toSend.l_pixel = marker_distance;
 						toSend.centerDistance = center_distance;
 						//publish 

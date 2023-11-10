@@ -31,6 +31,7 @@ class NavLogNode:
 		self.distance = 0.0
 		self.angle = 0.0
 		self.ack = False
+		self.to_found = 0
 		self.state = 0
 		self.current_pose = Pose2D()
 
@@ -52,11 +53,16 @@ class NavLogNode:
 	# Callback for markerPose subscription
 	def clbk_vision(self, msg):
 		# Acknowledge marker detection
-		self.ack = msg.ack
-		# Update distance 
-		self.distance = msg.l_pixel
-		# Update angle 
-		self.angle = msg.centerDistance
+		if(msg.marker_id == self.to_found):
+			self.ack = msg.ack
+			# Update distance 
+			self.distance = msg.l_pixel
+			# Update angle 
+			self.angle = msg.centerDistance
+		else :
+			self.ack = False
+			# Update distance 
+			self.distance = 0
 
 	#State 0: Search
 	#State 1: Reach
@@ -99,9 +105,10 @@ class NavLogNode:
 		while marker_list:
 
 			# Publish marker ID
-			self.pub_marker_id.publish(marker_list.pop(0))
+			self.to_found = marker_list.pop(0)
+			self.pub_marker_id.publish(self.to_found)
 			self.distance = 0
-			rospy.loginfo("Sent marker ID: %d" % marker_list[0])
+			rospy.loginfo("Sent marker ID: %d" % self.to_found)
 
 			# Set state 0
 			self.state = 0
@@ -114,12 +121,14 @@ class NavLogNode:
 			cmd.linear.x = 0
 			self.cmd_pub.publish(cmd)
 			# Untill the marker is not reached
+			rospy.loginfo("pixel size of marker ID %d : %d" %(self.to_found, self.distance))
 			while self.distance < 200:
 			    # Iterate the control
 			    self.change_state()
 			# Remove the reached token from the list
 			#marker_list.pop(0)
 			# Set the control values 
+			self.to_found = 0
 			self.ack = False
 			self.distance = 0
 		#When finished Robot spin 
