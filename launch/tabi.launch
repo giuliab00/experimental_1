@@ -7,7 +7,7 @@
   <arg name="debug" default="false"/>
 
   <rosparam command="load" file="$(find experimental_1)/config/joint_state_controller.yaml" />
-  <node name="joint_state_controller_spawner" pkg="controller_manager" type="spawner" output="screen" args="joint_state_controller              camera_velocity_controller" />      
+  <node name="joint_state_controller_spawner" pkg="controller_manager" type="spawner" output="screen" args="joint_state_controller camera_velocity_controller" />      
 
   <param name="robot_description" command="$(find xacro)/xacro '$(find experimental_1)/urdf/rosbot.xacro'"/>
 
@@ -25,6 +25,3 @@
   </include>
 
 </launch>
-
-
-

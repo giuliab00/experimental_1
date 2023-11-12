@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Import necessary ROS and Python packages
 import rospy
@@ -9,7 +9,7 @@ from experimental_1.msg import markerDistance
 from tf import transformations
 from geometry_msgs.msg import Pose2D, Twist
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Bool, Float32, Int32
+from std_msgs.msg import Bool, Float32, Int32, Float64
 from threading import Thread
 import math
 import time
@@ -32,11 +32,13 @@ class NavLogNode:
 		self.angle = 0.0
 		self.ack = False
 		self.to_found = 0
-		self.state = 0
 		self.current_pose = Pose2D()
-
+		self.camera_theta = 0.0
 		# Set control parameters
 
+
+		#Publish to cntrol the camera
+		self.camera_pub = rospy.Publisher("/camera_velocity_controller/command", Float64, queue_size=10)
 
 		# Publish marker ID goal
 		self.pub_marker_id = rospy.Publisher("/requestMarkerId", Int32, queue_size=10)
@@ -49,6 +51,34 @@ class NavLogNode:
 
 		# Subscribe to /odom
 		self.odom_sub = rospy.Subscriber("/odom", Odometry, self.clbk_odom)
+
+		#Subscriber to know camera misalignment
+		self.camera_sub = rospy.Subscriber("/camera_frame_rotation",Float32, self.clbk_camera)
+
+
+	def search_marker(self):
+		cam_msg = Float64()
+		cam_msg.data = 0.1
+		self.camera_pub.publish(cam_msg)
+		#Searching the marker in the evironment
+		while(not(self.ack)):
+			#waiting...
+			rospy.loginfo("looking for marker ID: %d" % self.to_found)
+		#Stop the camera
+		cam_msg.data = 0.0
+		self.camera_pub.publish(cam_msg)
+		#Center the camera with the marker
+		while(abs(self.angle/self.distance) > 0.2):
+			if((self.angle/self.distance) > 0.2):
+				#turn right
+				cam_msg.data = -0.05
+			elif((self.angle/self.distance) < -0.2):
+				#turn left					
+				cam_msg.data = 0.05
+			self.camera_pub.publish(cam_msg)
+		cam_msg.data = 0.0
+		self.camera_pub.publish(cam_msg)
+			
 
 	# Callback for markerPose subscription
 	def clbk_vision(self, msg):
@@ -64,37 +94,32 @@ class NavLogNode:
 			# Update distance 
 			self.distance = 0
 
-	#State 0: Search
-	#State 1: Reach
-	def change_state(self):
-		cmd = Twist()
-		if(self.state == 0):
-			if(self.ack):
-				self.state = 1
-				cmd.angular.z = 0
-				self.cmd_pub.publish(cmd)
-			else:
-				cmd.angular.z = 0.05
-				self.cmd_pub.publish(cmd)
-		elif(self.state == 1):
-			#Reach
-			if(self.distance >= 200):
-				self.state = 0
-				cmd.angular.z = 0
-				cmd.linear.x = 0
-				self.ack = False
-				self.distance = 0
-				self.cmd_pub.publish(cmd)
-			elif((self.angle/self.distance) > 0.2):
+
+	#Callback camera_rotation
+	def clbk_camera(self, msg):
+		self.camera_theta = msg.data
+
+	def align_body(self):
+		robot_cmd = Twist()
+		cam_cmd = Float64()
+		while(abs(self.camera_theta)> 0.05):
+			rospy.loginfo("Aligning camera and body")
+			if(self.camera_theta > math.pi):
 				#turn right
-				cmd.angular.z = -0.05;
-			elif((self.angle/self.distance) < -0.2):
-				#turn left					
-				cmd.angular.z = 0.05;
+				cam_cmd.data = -0.05
+				robot.angular.z = 0.05
 			else:
-				#go forward
-				cmd.linear.x = 0.05;
-			self.cmd_pub.publish(cmd)
+				#turn left					
+				cam_cmd.data = 0.05
+				robot.angular.z = -0.05
+			self.camera_pub.publish(cam_cmd)
+			self.cmd_pub.publish(robot_cmd)
+		cam_cmd.data = 0.0
+		robot.angular.z = 0.0
+		self.camera_pub.publish(cam_cmd)
+		self.cmd_pub.publish(robot_cmd)
+
+	
 
 	def routine(self):
 		# List of marker IDs
@@ -111,8 +136,6 @@ class NavLogNode:
 			self.distance = 0
 			rospy.loginfo("Sent marker ID: %d" % self.to_found)
 
-			# Set state 0
-			self.state = 0
 			# Move backword to better see the marker
 			cmd = Twist()
 			cmd.linear.x = -0.1
@@ -123,9 +146,14 @@ class NavLogNode:
 			self.cmd_pub.publish(cmd)
 			# Untill the marker is not reached
 			rospy.loginfo("pixel size of marker ID %d : %d" %(self.to_found, self.distance))
+			self.search_marker()
+			self.align_body()
 			while self.distance < 200:
-			    # Iterate the control
-			    self.change_state()
+				#Go Straight
+				cmd.linear.x = 0.05
+				self.cmd_pub.publish(cmd)
+			cmd.linear.x = 0.0
+			self.cmd_pub.publish(cmd)
 			# Remove the reached token from the list
 			#marker_list.pop(0)
 			# Set the control values 
