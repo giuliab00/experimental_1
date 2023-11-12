@@ -34,8 +34,6 @@ class NavLogNode:
 		self.to_found = 0
 		self.current_pose = Pose2D()
 		self.camera_theta = 0.0
-		# Set control parameters
-
 
 		#Publish to cntrol the camera
 		self.camera_pub = rospy.Publisher("/camera_velocity_controller/command", Float64, queue_size=10)
@@ -53,32 +51,21 @@ class NavLogNode:
 		self.odom_sub = rospy.Subscriber("/odom", Odometry, self.clbk_odom)
 
 		#Subscriber to know camera misalignment
-		self.camera_sub = rospy.Subscriber("/camera_frame_rotation",Float32, self.clbk_camera)
-
+		self.camera_sub = rospy.Subscriber("/camera_yaw",Float32, self.clbk_camera)
 
 	def search_marker(self):
 		cam_msg = Float64()
 		cam_msg.data = 0.1
 		self.camera_pub.publish(cam_msg)
 		#Searching the marker in the evironment
+		rospy.loginfo("searching marker ID: %d" % self.to_found)
 		while(not(self.ack)):
 			#waiting...
-			rospy.loginfo("looking for marker ID: %d" % self.to_found)
+			time.sleep(0.01)
 		#Stop the camera
+		rospy.loginfo("founded!")
 		cam_msg.data = 0.0
 		self.camera_pub.publish(cam_msg)
-		#Center the camera with the marker
-		while(abs(self.angle/self.distance) > 0.2):
-			if((self.angle/self.distance) > 0.2):
-				#turn right
-				cam_msg.data = -0.05
-			elif((self.angle/self.distance) < -0.2):
-				#turn left					
-				cam_msg.data = 0.05
-			self.camera_pub.publish(cam_msg)
-		cam_msg.data = 0.0
-		self.camera_pub.publish(cam_msg)
-			
 
 	# Callback for markerPose subscription
 	def clbk_vision(self, msg):
@@ -102,24 +89,28 @@ class NavLogNode:
 	def align_body(self):
 		robot_cmd = Twist()
 		cam_cmd = Float64()
-		while(abs(self.camera_theta)> 0.05):
-			rospy.loginfo("Aligning camera and body")
+		rospy.loginfo("Pointing the marker found and align the body to the camera")
+		while(abs(self.camera_theta) > 0.02):
 			if(self.camera_theta > math.pi):
-				#turn right
-				cam_cmd.data = -0.05
-				robot.angular.z = 0.05
+				#turn right the robot 
+				robot_cmd.angular.z = -0.05
 			else:
-				#turn left					
+				#turn left the robot		
+				robot_cmd.angular.z = 0.05
+			#conditions for traking the center of the marker
+			if((self.angle/self.distance) > 0.1):
+				#turn right the camera
 				cam_cmd.data = 0.05
-				robot.angular.z = -0.05
+			elif((self.angle/self.distance) < -0.1):
+				#turn left the camera			
+				cam_cmd.data = -0.05
 			self.camera_pub.publish(cam_cmd)
 			self.cmd_pub.publish(robot_cmd)
+		#Stop the robot
 		cam_cmd.data = 0.0
-		robot.angular.z = 0.0
+		robot_cmd.angular.z = 0.0
 		self.camera_pub.publish(cam_cmd)
 		self.cmd_pub.publish(robot_cmd)
-
-	
 
 	def routine(self):
 		# List of marker IDs
@@ -129,25 +120,16 @@ class NavLogNode:
 
 		# Until there are marker to reach
 		while marker_list:
-
 			# Publish marker ID
 			self.to_found = marker_list.pop(0)
 			self.pub_marker_id.publish(self.to_found)
 			self.distance = 0
 			rospy.loginfo("Sent marker ID: %d" % self.to_found)
-
-			# Move backword to better see the marker
 			cmd = Twist()
-			cmd.linear.x = -0.1
-			self.cmd_pub.publish(cmd)
-			time.sleep(1)
-			# Stop
-			cmd.linear.x = 0
-			self.cmd_pub.publish(cmd)
 			# Untill the marker is not reached
-			rospy.loginfo("pixel size of marker ID %d : %d" %(self.to_found, self.distance))
 			self.search_marker()
 			self.align_body()
+			rospy.loginfo("Reach marker ID: %d" % self.to_found)
 			while self.distance < 200:
 				#Go Straight
 				cmd.linear.x = 0.05
@@ -155,19 +137,13 @@ class NavLogNode:
 			cmd.linear.x = 0.0
 			self.cmd_pub.publish(cmd)
 			# Remove the reached token from the list
-			#marker_list.pop(0)
-			# Set the control values 
+			# reset callback values 
 			self.to_found = 0
 			self.ack = False
 			self.distance = 0
-		#When finished Robot spin 
-		cmd = Twist()
-		cmd.angular.z = 3
-		self.cmd_pub.publish(cmd)
-		time.sleep(5)
+		#When finished Robot spin
 		cmd.angular.z = 0
 		self.cmd_pub.publish(cmd)
-		
 
 	def clbk_odom(self, msg):
 		# Retrieve robot's current position and orientation from /odom topic

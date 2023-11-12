@@ -74,37 +74,16 @@ class MarkerDetector {
 		//publisher of markerDistance
 		ros::Publisher markerPoseGoal_pub_;
 		//subscriber to markerId to find
-		ros::Subscriber requestMarkerId_sub_;
-		//publisher of camera position
-		ros::Publisher cameraRot_pub_;
-		ros::Subscriber odom_sub_;
-		
-		//Trasformation matrix of camera w.r.t. the simulated world
-		tf::Transform wTb;
-		//Transformation matrix of the <camera> w.r.t. the <body>
-		tf::StampedTransform bTc;
-		//Transformation matrix of the <camera> w.r.t. the <body>
-		tf::Transform wTc;
-
-		tf::TransformListener _tfListener;
-		std::string camera_frame;
-  		std::string body_frame;
+		ros::Subscriber requestMarkerId_sub_;		
 		
 	public:
-		MarkerDetector() :
-			nh_("~"), it_(nh_), useCamInfo_(true) 
-		{
+		MarkerDetector() : nh_("~"), it_(nh_), useCamInfo_(true) {
+
 			//create the subscribe to camera image /camera/rgb/image_raw/compressed
 			image_sub_ = it_.subscribe("/camera/color/image_raw",1, &MarkerDetector::image_callback, this);
 
 			//create subscriber to camera info in order to set the proper Aruco Camera Parameter
 			cam_info_sub = nh_.subscribe("/camera/color/camera_info", 1, &MarkerDetector::cam_info_callback, this);
-
-			//Publisher for rotation of the camera
-			cameraRot_pub_ = nh_.advertise<std_msgs::Float32>("/camera_frame_rotation", 10);
-
-			//odom callback for simulation
-			odom_sub_ = nh_.subscribe("/odom", 1, &MarkerDetector::odom_callback_, this);
 
 			//Pub debug
 			debug_pub_ = it_.advertise("/debug/image_raw", 1);
@@ -113,10 +92,6 @@ class MarkerDetector {
 			nh_.param<bool>("use_camera_info", useCamInfo_, false);
 			nh_.param<bool>("pov_window", POV_window_b_, true);
 			nh_.param<bool>("campressed_camera", isCameraCompressed, false); //To handle the compression
-			
-			/*Frames*/
-			camera_frame = "camera_link";
-			body_frame = "body_link";
 			
 			camParam_ = aruco::CameraParameters();
 			
@@ -179,6 +154,7 @@ class MarkerDetector {
 						toSend.ack = 1; 
 						toSend.l_pixel = marker_distance;
 						toSend.centerDistance = center_distance;
+						toSend.marker_id = markers_[i].id;
 						//publish 
 						markerPoseGoal_pub_.publish(toSend);
 					}	
@@ -206,55 +182,11 @@ class MarkerDetector {
 			ROS_INFO("Translation (x, y, z): (%.2f, %.2f, %.2f)", translation.x(), translation.y(), translation.z());
 			ROS_INFO("Rotation (x, y, z, w): (%.2f, %.2f, %.2f, %.2f)", rotation.x(), rotation.y(), rotation.z(), rotation.w());
 		}
-
-		/*The aim of thi sfunction is to publish the actual rotation between 
-		the camera w.r.t. the world*/
-		void odom_callback_(const nav_msgs::Odometry &msg) {
-			//callback function to get the wTb
-			tf::Vector3 pos = tf::Vector3(msg.pose.pose.position.x,msg.pose.pose.position.y,msg.pose.pose.position.z);
-			tf::Quaternion rot = tf::Quaternion(msg.pose.pose.orientation.x,msg.pose.pose.orientation.y,msg.pose.pose.orientation.z,msg.pose.pose.orientation.w);
-			
-			//update the current transformation matrix
-			wTb.setOrigin(pos);
-			wTb.setRotation(rot);
-
-			/*Computation of rotation*/
-			getTransform(body_frame, camera_frame, bTc);
-			wTc = wTb*static_cast<tf::Transform>(bTc);
-			tf::Matrix3x3 wRc = wTc.getBasis();
-			tfScalar Y;
-			tfScalar P;
-			tfScalar R;
-			wRc.getRPY(R,P,Y); 
-			std_msgs::Float32 send;
-			send.data = static_cast<float>(Y);
-			cameraRot_pub_.publish(send);
-		}
-
-		bool getTransform(const std::string& refFrame, const std::string& childFrame, tf::StampedTransform& transform) {
-			std::string errMsg;
-
-			if (!_tfListener.waitForTransform(refFrame, childFrame, ros::Time(0), ros::Duration(0.5), ros::Duration(0.01), &errMsg)) {
-				ROS_ERROR_STREAM("Unable to get pose from TF: " << errMsg);
-				return false;
-			}
-			else {
-				try {
-					// get latest available
-					_tfListener.lookupTransform(refFrame, childFrame, ros::Time(0), transform);
-				}
-				catch (const tf::TransformException& e) {
-					ROS_ERROR_STREAM("Error in lookupTransform of " << childFrame << " in " << refFrame);
-					return false;
-				}
-			}
-			return true;
-		}
 			
 		void find_marker_callback(const std_msgs::Int32 &msg) {
 			/*Update the marker to found once a new one has been published*/
 			actual_marker_id_ = msg.data;
-			ROS_INFO("Belin mi è arrivata una richiesta marker %d", msg.data);	
+			ROS_INFO("Belin mi ï¿½ arrivata una richiesta marker %d", msg.data);	
 		}
 		  
 		// wait for one camerainfo to get Aruco CameraParam, then shut down that subscriber
