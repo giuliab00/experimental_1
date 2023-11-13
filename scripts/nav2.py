@@ -87,12 +87,13 @@ class NavLogNode:
 				self.cmd_pub.publish(cmd)
 			elif((self.angle/self.distance) > 0.2):
 				#turn right
-				cmd.angular.z = -0.05;
+				cmd.angular.z = 0.05;
 			elif((self.angle/self.distance) < -0.2):
 				#turn left					
-				cmd.angular.z = 0.05;
+				cmd.angular.z = -0.05;
 			else:
 				#go forward
+				cmd.angular.z = 0.0;
 				cmd.linear.x = 0.05;
 			self.cmd_pub.publish(cmd)
 
