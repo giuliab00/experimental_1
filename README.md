@@ -8,6 +8,15 @@ Here is explained in detail the behaviour for the simulation, while at the end o
 How to download
 ----------------------
 
+Before starting to download the package, you need to have xterm installed on your computer, so the launch file will work properly.
+To do so, open your terminal and run the foolowing command:
+
+```bash
+sudo apt-get install xterm
+```
+
+Now you are ready to run the solution!
+
 In order to run the solution it is necessary to execute the following commands:
 
 ```bash
