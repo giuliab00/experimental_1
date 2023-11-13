@@ -15,9 +15,7 @@ To do so, open your terminal and run the foolowing command:
 sudo apt-get install xterm
 ```
 
-Now you are ready to run the solution!
-
-In order to run the solution it is necessary to execute the following commands:
+Then, in order to run the solution it is necessary to execute the following commands:
 
 ```bash
 git clone https://github.com/ros-perception/vision_opencv
