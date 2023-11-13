@@ -9,7 +9,7 @@ How to download
 ----------------------
 
 Before starting to download the package, you need to have xterm installed on your computer, so the launch file will work properly.
-To do so, open your terminal and run the foolowing command:
+To do so, open your terminal and run the following command:
 
 ```bash
 sudo apt-get install xterm
