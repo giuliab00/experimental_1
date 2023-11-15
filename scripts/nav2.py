@@ -2,23 +2,13 @@
 
 # Import necessary ROS and Python packages
 import rospy
-import actionlib
-import actionlib.msg
-import experimental_1.msg
 from experimental_1.msg import markerDistance
-from tf import transformations
 from geometry_msgs.msg import Pose2D, Twist
-from nav_msgs.msg import Odometry
 from std_msgs.msg import Bool, Float32, Int32
 from threading import Thread
 import math
 import time
 
-# Initialize ROS publishers, subscribers and variables
-vel_pub = None
-srv_ask_pixels = None
-robot_pose_sub = None
-movement = None
 
 class NavLogNode:
 
@@ -33,12 +23,10 @@ class NavLogNode:
 		self.ack = False
 		self.to_found = 0
 		self.state = 0
-		self.current_pose = Pose2D()
+		self.l_vel = 0.05
+		self.a_vel = 0.05
 
-		# Set control parameters
-
-
-		# Publish marker ID goal
+		# Publish for /requestMarkerId
 		self.pub_marker_id = rospy.Publisher("/requestMarkerId", Int32, queue_size=10)
 
 		# Publisher for /cmd_vel
@@ -47,21 +35,18 @@ class NavLogNode:
 		# Subscribe to the topic for goal position from marker detection
 		self.sub_marker_dist = rospy.Subscriber("/markerDistance", markerDistance, self.clbk_vision)
 
-		# Subscribe to /odom
-		self.odom_sub = rospy.Subscriber("/odom", Odometry, self.clbk_odom)
-
 	# Callback for markerPose subscription
 	def clbk_vision(self, msg):
-		# Acknowledge marker detection
 		if(msg.marker_id == self.to_found):
+			# Acknowledge marker detection
 			self.ack = msg.ack
 			# Update distance 
 			self.distance = msg.l_pixel
 			# Update angle 
 			self.angle = msg.centerDistance
 		else :
+			#wrong/old marker found 
 			self.ack = False
-			# Update distance 
 			self.distance = 0
 
 	#State 0: Search
@@ -74,7 +59,7 @@ class NavLogNode:
 				cmd.angular.z = 0
 				self.cmd_pub.publish(cmd)
 			else:
-				cmd.angular.z = 0.05
+				cmd.angular.z = self.a_vel
 				self.cmd_pub.publish(cmd)
 		elif(self.state == 1):
 			#Reach
@@ -87,14 +72,14 @@ class NavLogNode:
 				self.cmd_pub.publish(cmd)
 			elif((self.angle/self.distance) > 0.2):
 				#turn right
-				cmd.angular.z = 0.05;
+				cmd.angular.z = self.a_vel
 			elif((self.angle/self.distance) < -0.2):
 				#turn left					
-				cmd.angular.z = -0.05;
+				cmd.angular.z = -self.a_vel
 			else:
 				#go forward
-				cmd.angular.z = 0.0;
-				cmd.linear.x = 0.05;
+				cmd.angular.z = 0.0
+				cmd.linear.x = self.l_vel
 			self.cmd_pub.publish(cmd)
 
 	def routine(self):
@@ -114,25 +99,25 @@ class NavLogNode:
 
 			# Set state 0
 			self.state = 0
+			
 			# Move backword to better see the marker
 			cmd = Twist()
-			cmd.linear.x = -0.1
+			cmd.linear.x = -self.l_vel
 			self.cmd_pub.publish(cmd)
 			time.sleep(1)
 			# Stop
 			cmd.linear.x = 0
 			self.cmd_pub.publish(cmd)
+			
 			# Untill the marker is not reached
-			rospy.loginfo("pixel size of marker ID %d : %d" %(self.to_found, self.distance))
 			while self.distance < 200:
-			    # Iterate the control
-			    self.change_state()
+				# Iterate the control
+				self.change_state()
 			# Remove the reached token from the list
 			#marker_list.pop(0)
 			# Set the control values 
 			self.to_found = 0
-			self.ack = False
-			self.distance = 0
+			
 		#When finished Robot spin 
 		cmd = Twist()
 		cmd.angular.z = 3
@@ -141,19 +126,6 @@ class NavLogNode:
 		cmd.angular.z = 0
 		self.cmd_pub.publish(cmd)
 		
-
-	def clbk_odom(self, msg):
-		# Retrieve robot's current position and orientation from /odom topic
-		self.current_pose.x = msg.pose.pose.position.x
-		self.current_pose.y = msg.pose.pose.position.y
-		quaternion = (
-		    msg.pose.pose.orientation.x,
-		    msg.pose.pose.orientation.y,
-		    msg.pose.pose.orientation.z,
-		    msg.pose.pose.orientation.w
-		)
-		euler = transformations.euler_from_quaternion(quaternion)
-		self.current_pose.theta = euler[2]
 
 # Main routine
 def main():
@@ -173,6 +145,7 @@ def main():
 
     # On shutdown...
     rospy.loginfo("Shutdown logic node...")
+    rospy.signal_shutdown('Node shutting down')
 
 if __name__ == '__main__':
     main()
