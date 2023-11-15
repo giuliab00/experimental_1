@@ -40,6 +40,9 @@ class NavLogNode:
 		#Subscriber to know camera misalignment
 		self.camera_sub = rospy.Subscriber("/camera_yaw",Float32, self.clbk_camera)
 
+		#Publisher to notify marker Detector to finish
+		self.exit_pub = rospy.Publisher("/task_complete", Bool, queue_size = 10)
+
 	"""
 		This method is used to control the camera for searching the actual desired
 		aruco marker.
@@ -93,7 +96,8 @@ class NavLogNode:
 		robot_cmd = Twist()
 		cam_cmd = Float64()
 		rospy.loginfo("Pointing the marker found and align the body to the camera")
-		while(abs(self.camera_theta) > 0.02):
+		while((abs(self.camera_theta) > 0.02)):
+			rospy.loginfo("camera_theta:%f angle/dist:%f" %(self.camera_theta, (self.angle/self.distance)) )
 			if(self.camera_theta > math.pi):
 				#turn right the robot 
 				robot_cmd.angular.z = -self.a_vel
@@ -135,6 +139,12 @@ class NavLogNode:
 			self.distance = 0
 			rospy.loginfo("Sent marker ID: %d" % self.to_found)
 			cmd = Twist()
+			cmd.linear.x = -self.l_vel
+			self.cmd_pub.publish(cmd)
+			time.sleep(1)
+			# Stop
+			cmd.linear.x = 0
+			self.cmd_pub.publish(cmd)
 			# Untill the marker is not reached
 			self.search_marker()
 			self.align_body()
@@ -153,6 +163,11 @@ class NavLogNode:
 		#When finished Robot spin
 		cmd.angular.z = 0
 		self.cmd_pub.publish(cmd)
+				
+		# Notify markerDetector to finish 
+		msg = Bool()
+		msg.data = True
+		self.exit_pub.publish(msg)
 
 def main():
 	# Wait for other nodes to initialize properly
