@@ -6,6 +6,7 @@
 #include "sensor_msgs/image_encodings.h"
 #include "std_msgs/Int32.h"
 #include "std_msgs/Float32.h"
+#include "std_msgs/Bool.h"
 #include "experimental_1/markerDistance.h"
 #include "opencv2/core/mat.hpp"
 #include "nav_msgs/Odometry.h"
@@ -66,7 +67,8 @@ class MarkerDetector {
 		//publisher of markerDistance
 		ros::Publisher markerPoseGoal_pub_;
 		//subscriber to markerId to find
-		ros::Subscriber requestMarkerId_sub_;		
+		ros::Subscriber requestMarkerId_sub_;
+		ros::Subscriber killer_sub_;	
 		
 	public:
 		MarkerDetector() : nh_("~"), it_(nh_) {
@@ -86,6 +88,8 @@ class MarkerDetector {
 			//subscriber to know the marker to found
 			requestMarkerId_sub_ = nh_.subscribe("/requestMarkerId",1, &MarkerDetector::find_marker_callback, this);
 
+			killer_sub_ = nh_.subscribe("/task_complete",1, &MarkerDetector::killer_callback, this);
+			
 			//Read params	
 			nh_.param<bool>("pov_window", POV_window_b_, false);
 			
@@ -186,6 +190,14 @@ class MarkerDetector {
 			camParam_ = aruco_ros::rosCameraInfo2ArucoCamParams(msg, useRectifiedImages);
 			//kill the subscriber
 			cam_info_sub.shutdown();
+		}
+
+		/*
+		        If recived a message of finish work this callback 
+		        ends the node
+		*/
+		void killer_callback(const std_msgs::Bool &msg){
+		        if(msg.data) ros::shutdown();
 		}
 				
 };
