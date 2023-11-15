@@ -7,7 +7,8 @@
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 
-/*  subscriers:
+/*      subscriers:
+                - /task_complete                        : topic for close the node
  * 
  * 	publishers:
  * 		- /camera_yaw				: yaw angle of the camera frame
@@ -38,6 +39,8 @@ class GeometryNode {
 		tf::TransformListener _tfListener;
 		std::string camera_frame;
   		std::string body_frame;
+  		
+  		ros::Subscriber killer_sub_;
 		
 	public:
 		/*Constructor*/
@@ -51,6 +54,8 @@ class GeometryNode {
 		
 			/*Timer for retrive the yaw of the camera*/
 			camera_timer_ = nh_.createTimer(ros::Duration(timer_camera_period), &GeometryNode::timerCamCallback, this);
+			
+			killer_sub_ = nh_.subscribe("/task_complete",1, &MarkerDetector::killer_callback, this);
 		}
 
 		/*
@@ -101,6 +106,14 @@ class GeometryNode {
 				}
 			}
 			return true;
+		}
+		
+		/*
+		        If recived a message of finish work this callback 
+		        ends the node
+		*/
+		void killer_callback(const std_msgs::Bool &msg){
+		        if(msg.data) ros::shutdown();
 		}
 
 };
