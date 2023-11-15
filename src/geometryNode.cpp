@@ -2,6 +2,7 @@
 #include "ros/ros.h"
 #include <sstream>
 #include "std_msgs/Float32.h"
+#include "std_msgs/Bool.h"
 
 /*Transforms*/
 #include <tf/transform_broadcaster.h>
@@ -55,7 +56,7 @@ class GeometryNode {
 			/*Timer for retrive the yaw of the camera*/
 			camera_timer_ = nh_.createTimer(ros::Duration(timer_camera_period), &GeometryNode::timerCamCallback, this);
 			
-			killer_sub_ = nh_.subscribe("/task_complete",1, &MarkerDetector::killer_callback, this);
+			killer_sub_ = nh_.subscribe("/task_complete",1, &GeometryNode::killer_callback, this);
 		}
 
 		/*
