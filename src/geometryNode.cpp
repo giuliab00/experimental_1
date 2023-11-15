@@ -1,12 +1,18 @@
 #include <iostream>
 #include "ros/ros.h"
 #include <sstream>
-//Data types
 #include "std_msgs/Float32.h"
 
 /*Transforms*/
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
+
+/*  subscriers:
+ * 
+ * 	publishers:
+ * 		- /camera_yaw				: yaw angle of the camera frame
+ * 		
+ */
 
 class GeometryNode {
 	
@@ -47,10 +53,10 @@ class GeometryNode {
 			camera_timer_ = nh_.createTimer(ros::Duration(timer_camera_period), &GeometryNode::timerCamCallback, this);
 		}
 
-		/*Distructor*/
-		~GeometryNode() {
-		}
-
+		/*
+			Debug function to print on the terminal a specific Transformation 
+			function
+		*/
 		void printTransform(const tf::Transform& transform) {
 			tf::Vector3 translation = transform.getOrigin();
 			tf::Quaternion rotation = transform.getRotation();
@@ -59,6 +65,11 @@ class GeometryNode {
 			ROS_INFO("Rotation (x, y, z, w): (%.2f, %.2f, %.2f, %.2f)", rotation.x(), rotation.y(), rotation.z(), rotation.w());
 		}
 
+		/*
+			callback function to retrive with "getTransform" function the transformation
+			matrix of the camera frame with respect to the body frame, then from the Rotation matrix 
+			it compute the Euler's angle and publish only the Yaw angle 
+		*/
 		void timerCamCallback(const ros::TimerEvent&){
 			getTransform(body_frame, camera_frame, bTc);
 			tf::Matrix3x3 wRc = static_cast<tf::Transform>(bTc).getBasis();
@@ -69,6 +80,9 @@ class GeometryNode {
 			cameraRot_pub_.publish(send);
 		}
 
+		/*
+			By tflistemer it search for the trasformation function of interested frames
+		*/
 		bool getTransform(const std::string& refFrame, const std::string& childFrame, tf::StampedTransform& transform) {
 			std::string errMsg;
 

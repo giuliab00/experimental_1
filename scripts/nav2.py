@@ -2,23 +2,12 @@
 
 # Import necessary ROS and Python packages
 import rospy
-import actionlib
-import actionlib.msg
-import experimental_1.msg
 from experimental_1.msg import markerDistance
-from tf import transformations
-from geometry_msgs.msg import Pose2D, Twist
-from nav_msgs.msg import Odometry
+from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool, Float32, Int32, Float64
 from threading import Thread
 import math
 import time
-
-# Initialize ROS publishers, subscribers and variables
-vel_pub = None
-srv_ask_pixels = None
-robot_pose_sub = None
-movement = None
 
 class NavLogNode:
 
@@ -32,8 +21,9 @@ class NavLogNode:
 		self.angle = 0.0
 		self.ack = False
 		self.to_found = 0
-		self.current_pose = Pose2D()
 		self.camera_theta = 0.0
+		self.l_vel = 0.2
+		self.a_vel = 0.2
 
 		#Publish to cntrol the camera
 		self.camera_pub = rospy.Publisher("/camera_velocity_controller/command", Float64, queue_size=10)
@@ -47,12 +37,13 @@ class NavLogNode:
 		# Subscribe to the topic for goal position from marker detection
 		self.sub_marker_dist = rospy.Subscriber("/markerDistance", markerDistance, self.clbk_vision)
 
-		# Subscribe to /odom
-		self.odom_sub = rospy.Subscriber("/odom", Odometry, self.clbk_odom)
-
 		#Subscriber to know camera misalignment
 		self.camera_sub = rospy.Subscriber("/camera_yaw",Float32, self.clbk_camera)
 
+	"""
+		This method is used to control the camera for searching the actual desired
+		aruco marker.
+	"""
 	def search_marker(self):
 		cam_msg = Float64()
 		cam_msg.data = 0.1
@@ -67,6 +58,10 @@ class NavLogNode:
 		cam_msg.data = 0.0
 		self.camera_pub.publish(cam_msg)
 
+	"""
+		This callback function is used to retrive the iformation
+		about the actual desired marker
+	"""
 	# Callback for markerPose subscription
 	def clbk_vision(self, msg):
 		# Acknowledge marker detection
@@ -81,11 +76,19 @@ class NavLogNode:
 			# Update distance 
 			self.distance = 0
 
-
+	"""
+		This callback function retrive the yaw angle of the camera frame
+		with respect to the body frame
+	"""
 	#Callback camera_rotation
 	def clbk_camera(self, msg):
 		self.camera_theta = msg.data
 
+	"""
+		This function handle to align the body frame to the camera frame.
+		In function of the smaller angle of rotation the RosBot start to rotate
+		while the camera try to stay aligned with the marker pointed
+	"""
 	def align_body(self):
 		robot_cmd = Twist()
 		cam_cmd = Float64()
@@ -93,17 +96,17 @@ class NavLogNode:
 		while(abs(self.camera_theta) > 0.02):
 			if(self.camera_theta > math.pi):
 				#turn right the robot 
-				robot_cmd.angular.z = -0.05
+				robot_cmd.angular.z = -self.a_vel
 			else:
 				#turn left the robot		
-				robot_cmd.angular.z = 0.05
+				robot_cmd.angular.z = self.a_vel
 			#conditions for traking the center of the marker
 			if((self.angle/self.distance) > 0.1):
 				#turn right the camera
-				cam_cmd.data = 0.05
+				cam_cmd.data = self.a_vel
 			elif((self.angle/self.distance) < -0.1):
 				#turn left the camera			
-				cam_cmd.data = -0.05
+				cam_cmd.data = -self.a_vel
 			self.camera_pub.publish(cam_cmd)
 			self.cmd_pub.publish(robot_cmd)
 		#Stop the robot
@@ -112,6 +115,12 @@ class NavLogNode:
 		self.camera_pub.publish(cam_cmd)
 		self.cmd_pub.publish(robot_cmd)
 
+	"""
+		Main function containing the marker IDs and the control logic of the job
+		For each marker, firstly the RosBot search it by selecting the right id,
+		then it align the body to the camera and at the end it reach the marker 
+		taking care of the dimension of the marker inside the camera image matrix
+	"""
 	def routine(self):
 		# List of marker IDs
 		marker_list = [11, 12, 13, 15]
@@ -132,7 +141,7 @@ class NavLogNode:
 			rospy.loginfo("Reach marker ID: %d" % self.to_found)
 			while self.distance < 200:
 				#Go Straight
-				cmd.linear.x = 0.05
+				cmd.linear.x = self.l_vel
 				self.cmd_pub.publish(cmd)
 			cmd.linear.x = 0.0
 			self.cmd_pub.publish(cmd)
@@ -145,38 +154,25 @@ class NavLogNode:
 		cmd.angular.z = 0
 		self.cmd_pub.publish(cmd)
 
-	def clbk_odom(self, msg):
-		# Retrieve robot's current position and orientation from /odom topic
-		self.current_pose.x = msg.pose.pose.position.x
-		self.current_pose.y = msg.pose.pose.position.y
-		quaternion = (
-		    msg.pose.pose.orientation.x,
-		    msg.pose.pose.orientation.y,
-		    msg.pose.pose.orientation.z,
-		    msg.pose.pose.orientation.w
-		)
-		euler = transformations.euler_from_quaternion(quaternion)
-		self.current_pose.theta = euler[2]
-
-# Main routine
 def main():
-    # Wait for other nodes to initialize properly
-    time.sleep(1)
+	# Wait for other nodes to initialize properly
+	time.sleep(1)
 
-    # Create and spin the controller node
-    logic = NavLogNode()
+	# Create and spin the controller node
+	logic = NavLogNode()
 
-    # Spinning thread to ensure that ROS callbacks are executed
-    spin_thread = Thread(target=rospy.spin)
-    spin_thread.start()
+	# Spinning thread to ensure that ROS callbacks are executed
+	spin_thread = Thread(target=rospy.spin)
+	spin_thread.start()
 
-    # Start the logic node routine
-    time.sleep(1)
-    logic.routine()
+	# Start the logic node routine
+	time.sleep(1)
+	logic.routine()
 
-    # On shutdown...
-    rospy.loginfo("Shutdown logic node...")
-
+	# On shutdown...
+	rospy.loginfo("Shutdown logic node...")
+	rospy.signal_shutdown('Shutting down the node')
+	
 if __name__ == '__main__':
     main()
 

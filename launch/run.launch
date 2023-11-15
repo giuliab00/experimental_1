@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+  <node name="geometryNode" pkg="experimental_1" type="geometryNode" output="screen"/>  
+  
+  <node name="markerDetector" pkg="experimental_1" type="markerDetector" output="screen"/>
+
+  <node name="navlogNode" pkg="experimental_1" type="nav2.py" output="screen" launch-prefix="xterm -e"/>
+
+
+</launch>
