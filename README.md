@@ -10,13 +10,13 @@ How to download
 
 In order to run the solution it is necessary to have the following ROS package:
 
-OPEN CV: that must be the same version of your ros, in our case noetict If you are downloading on the rosbot you don't need it since it's already there.
+* OpenCV: that must be the same version of your ros, in our case noetict If you are downloading on the rosbot you don't need it since it's already there.
 
 ```bash
 git clone https://github.com/ros-perception/vision_opencv
 git checkout noetic
 ```
-ArUco ROS in order to have the models of the marker in the simulation and all the libraries provided by Aruco to recognize the markers. The following is for ROS noetic
+* ArUco: in order to have the models of the marker in the simulation and all the libraries provided by Aruco to recognize the markers. The following is for ROS noetic
 ```bash
 git clone https://github.com/CarmineD8/aruco_ros
 ```
@@ -28,7 +28,7 @@ git clone https://github.com/pal-robotics/aruco_ros
 git checkout melodic-devel
 ```
 
-For the simulation with the fixed camera is important to have the model of the rosbot. This can be obtained with the following lines. Once again remember to branch to the correnct implemnation for your ROS version.
+* Rosbot: For the simulation with the fixed camera is important to have the model of the rosbot. This can be obtained with the following lines. Once again remember to branch to the correnct implementation for your ROS version.
 ```bash
 git clone https://github.com/husarion/rosbot_ros
 git checkout noetic
@@ -40,8 +40,8 @@ git clone https://github.com/giuliab00/experimental_1
 ```
 
 It contains two branches:
-* main one for the rosbot and the implentation with the fixed camera. 
-* simulation for the simulation with the rotating camera. 
+* **main**: for the rosbot and the implentation with the fixed camera. 
+* **simulation** for the simulation with the rotating camera. 
 
 So rember to branch on the interessed one.
 
@@ -66,7 +66,8 @@ The two nodes are now running and the rosbot will start looking for marker and r
 
 ### Architecture and Pseudocode
 In order to achieve the solution it has been thought of the following architecture:\
-![architechture1](https://github.com/giuliab00/experimental_1/blob/main/photo_5958566034669681941_y.jpg)
+![architecture 1](https://github.com/giuliab00/experimental_1/assets/114082533/d2a204b4-cba2-49c8-89d2-11cba2d59665)
+
 
 There are two node: the **navlog** Node that is the one in charge of controlling the behaviour of the rosbot and the **marker Detecor** Node that is the one in charge of recognizing the markers. Now let's see in the detail how this work and the main differences with the Simulation with rotating camera.  
 
@@ -209,7 +210,8 @@ sudo apt-get install xterm
 ### Architecture and Pseudocode
 
 In order to achieve the solution it has been thought of the following architecture:\
-![architechture2](https://github.com/giuliab00/experimental_1/blob/main/photo_5958566034669681942_y.jpg)
+![architecture2](https://github.com/giuliab00/experimental_1/assets/114082533/bf7abbab-11e5-4ba6-a6c7-73cadecccda3)
+
 
 Substuntially with respect to the previous the **navlog** node and the  **markerDetector** node have the same behaviour and the **geometry** node is added and is the one in charge of computing the misalignmnet between the camera and the body frame.
 
