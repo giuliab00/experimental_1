@@ -350,7 +350,7 @@ Drawback and Possible improvements
 -------------------------
 There are different improvement regarding both the simulation and the real rosbot.
 
-Regarding the simultaion one main problem was the detection of marker 12 after reaching marker 11 due to the shadow of the gray boxes. To overcome this problem the rosbot take a step back after reaching each marker in our implementaion. Another solutionis to change the color of the boxes in the simulation to be withe in this way the robot detect the marker without any problem because the shadow are not so dark anymore and make the square of the marker recognizible.
+Regarding the simultaion one main problem was the detection of marker 12 after reaching marker 11 due to the shadow of the gray boxes. To overcome this problem we change the color of the boxes in the simulation to be white in this way the robot detect the marker easier because the shadow are not so dark anymore and make the square of the marker recognizible. Another solution could be to make the robot take a step back after reaching each marker. To be even more precise combining the two tecniques could be a good idea.
 
 The simulation with the fixed camera has been developed in an initial phase of the project but right now no launch file is provided to see it. But can be easily obtained in the main function by launch a simulation with the standard rosbot model provided by huarison and the same node used by the real robot by remapping the topic look by the markerDetecor to the one of the simulation. 
 
