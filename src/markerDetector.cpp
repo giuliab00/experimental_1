@@ -206,7 +206,6 @@ class MarkerDetector {
 
 int main(int argc, char **argv){
 	// init ros Node
-	sleep(6)
 	ros::init(argc, argv, "marker_detector");	
 
 	//create markerDetecor

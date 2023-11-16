@@ -122,7 +122,7 @@ class GeometryNode {
 };
 
 int main(int argc, char **argv){
-	sleep(6)
+	sleep(2);
 	// init ros Node
 	ros::init(argc, argv, "geometry_node");	
 

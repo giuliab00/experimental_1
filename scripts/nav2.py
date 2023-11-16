@@ -97,7 +97,6 @@ class NavLogNode:
 		cam_cmd = Float64()
 		rospy.loginfo("Pointing the marker found and align the body to the camera")
 		while((abs(self.camera_theta) > 0.05) or abs((self.angle/self.distance)) > 0.2):
-			rospy.loginfo("camera_theta:%f angle/dist:%f" %(self.camera_theta, (self.angle/self.distance)) )
 			if(self.camera_theta < 0.02):
 				#turn right the robot 
 				robot_cmd.angular.z = -self.a_vel
@@ -143,13 +142,6 @@ class NavLogNode:
 			self.distance = 0
 			rospy.loginfo("Sent marker ID: %d" % self.to_found)
 			cmd = Twist()
-			#cmd.linear.x = -self.l_vel
-			#self.cmd_pub.publish(cmd)
-			#time.sleep(1)
-			# Stop
-			#cmd.linear.x = 0
-			#self.cmd_pub.publish(cmd)
-			# Untill the marker is not reached
 			self.search_marker()
 			self.align_body()
 			rospy.loginfo("Reach marker ID: %d" % self.to_found)
@@ -175,7 +167,7 @@ class NavLogNode:
 
 def main():
 	# Wait for other nodes to initialize properly
-	time.sleep(10)
+	time.sleep(2)
 
 	# Create and spin the controller node
 	logic = NavLogNode()
@@ -185,6 +177,7 @@ def main():
 	spin_thread.start()
 
 	# Start the logic node routine
+	time.sleep(1)
 	logic.routine()
 
 	# On shutdown...
