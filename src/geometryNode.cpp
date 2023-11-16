@@ -8,6 +8,8 @@
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 
+#include <unistd.h>
+
 /*      subscriers:
                 - /task_complete                        : topic for close the node
  * 
@@ -120,6 +122,7 @@ class GeometryNode {
 };
 
 int main(int argc, char **argv){
+	sleep(6)
 	// init ros Node
 	ros::init(argc, argv, "geometry_node");	
 

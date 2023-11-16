@@ -96,14 +96,16 @@ class NavLogNode:
 		robot_cmd = Twist()
 		cam_cmd = Float64()
 		rospy.loginfo("Pointing the marker found and align the body to the camera")
-		while((abs(self.camera_theta) > 0.02)):
+		while((abs(self.camera_theta) > 0.05) or abs((self.angle/self.distance)) > 0.2):
 			rospy.loginfo("camera_theta:%f angle/dist:%f" %(self.camera_theta, (self.angle/self.distance)) )
-			if(self.camera_theta > math.pi):
+			if(self.camera_theta < 0.02):
 				#turn right the robot 
 				robot_cmd.angular.z = -self.a_vel
-			else:
+			elif (self.camera_theta > 0.02):
 				#turn left the robot		
 				robot_cmd.angular.z = self.a_vel
+			else :
+				robot_cmd.angular.z = 0.0
 			#conditions for traking the center of the marker
 			if((self.angle/self.distance) > 0.1):
 				#turn right the camera
@@ -111,6 +113,8 @@ class NavLogNode:
 			elif((self.angle/self.distance) < -0.1):
 				#turn left the camera			
 				cam_cmd.data = -self.a_vel
+			else:
+				cam_cmd.data = 0.0
 			self.camera_pub.publish(cam_cmd)
 			self.cmd_pub.publish(robot_cmd)
 		#Stop the robot
@@ -139,12 +143,12 @@ class NavLogNode:
 			self.distance = 0
 			rospy.loginfo("Sent marker ID: %d" % self.to_found)
 			cmd = Twist()
-			cmd.linear.x = -self.l_vel
-			self.cmd_pub.publish(cmd)
-			time.sleep(1)
+			#cmd.linear.x = -self.l_vel
+			#self.cmd_pub.publish(cmd)
+			#time.sleep(1)
 			# Stop
-			cmd.linear.x = 0
-			self.cmd_pub.publish(cmd)
+			#cmd.linear.x = 0
+			#self.cmd_pub.publish(cmd)
 			# Untill the marker is not reached
 			self.search_marker()
 			self.align_body()
@@ -163,7 +167,7 @@ class NavLogNode:
 		#When finished Robot spin
 		cmd.angular.z = 0
 		self.cmd_pub.publish(cmd)
-				
+		time.sleep(2)
 		# Notify markerDetector to finish 
 		msg = Bool()
 		msg.data = True
@@ -171,7 +175,7 @@ class NavLogNode:
 
 def main():
 	# Wait for other nodes to initialize properly
-	time.sleep(1)
+	time.sleep(10)
 
 	# Create and spin the controller node
 	logic = NavLogNode()
@@ -181,7 +185,6 @@ def main():
 	spin_thread.start()
 
 	# Start the logic node routine
-	time.sleep(1)
 	logic.routine()
 
 	# On shutdown...

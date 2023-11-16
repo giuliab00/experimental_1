@@ -15,6 +15,7 @@
 #include <iostream>
 #include <opencv2/highgui.hpp>
 #include <aruco_ros/aruco_ros_utils.h>
+#include <unistd.h>
 
 /*  subscriers:
  * 		- /camera/color/image_raw		: image from the camera
@@ -205,6 +206,7 @@ class MarkerDetector {
 
 int main(int argc, char **argv){
 	// init ros Node
+	sleep(6)
 	ros::init(argc, argv, "marker_detector");	
 
 	//create markerDetecor
