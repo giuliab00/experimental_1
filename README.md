@@ -62,6 +62,9 @@ To run the code in both case just execute this command on the bash :
 rosrun experimental_1 markerDetector
 rosrun experimental_1 nav2.py
 ```
+```bash
+roslaunch experimental_1 laboratorium.launch
+```
 
 The two nodes are now running and the rosbot will start looking for marker and reach them.
 
