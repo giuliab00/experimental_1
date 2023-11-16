@@ -190,6 +190,10 @@ main(){
 ### Video
 Here it is possible to find the video showing the rosbot in action.
 
+
+https://github.com/giuliab00/experimental_1/assets/114082533/557a6603-cb2d-4cb0-8ea1-5774017435cc
+
+
 As seen in the video the rosbot is a little slow but this can be adjust by modifying the values of the velocity variables initialized in the navlog node.
 
 SIMULATION with rotating Camera
