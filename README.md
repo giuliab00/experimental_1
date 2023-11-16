@@ -341,6 +341,9 @@ https://github.com/giuliab00/experimental_1/assets/114082533/bd02b73e-6956-45aa-
 
 
 Here it is possible to find a video showing the behaviour of the simulation with a fixed camera
+
+
+
 https://github.com/giuliab00/experimental_1/assets/114100814/c17ca7f1-98aa-44b7-9c01-f45f4e1ba004
 
 
