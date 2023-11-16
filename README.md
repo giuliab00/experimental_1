@@ -59,10 +59,6 @@ If you want to run the package with the rosbot there are two possible way:
 To run the code in both case just execute this command on the bash :
 
 ```bash
-rosrun experimental_1 markerDetector
-rosrun experimental_1 nav2.py
-```
-```bash
 roslaunch experimental_1 laboratorium.launch
 ```
 
@@ -203,7 +199,6 @@ SIMULATION with rotating Camera
 If you have followed the previous steps, and are in the simulation branch it is possible to start the simulation with the rotating camera using the following command:
 
 ```bash
-roslaunch experimental_1 tabi.launch
 roslaunch experimental_1 run.launch
 ```
 to properly execute the launch file it's important to have xterm because it allows to have each node in a single window and see clearly the output of each node. To download xterm write this line on your terminal
