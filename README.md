@@ -333,6 +333,7 @@ This node is the one recognizing marker and computing the values to tell the nav
 
 ### Video
 Here it is possible to find the video showing the behaviour in the simulation with the rotating camera
+![simulation](https://github.com/giuliab00/experimental_1/blob/main/Video%20Simulation%20w%20Rot%20Cam.mp4)
 
 Here it is possible to find a video showing the behaviour of the simulation with a fixed camera
 https://github.com/giuliab00/experimental_1/assets/114100814/c17ca7f1-98aa-44b7-9c01-f45f4e1ba004
