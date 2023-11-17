@@ -137,7 +137,7 @@ Main:
 This node is the one recognizing marker and computing the values to tell the navlog about the distance between the rosbot and the marker. To detect the marker the ArUco marker detector has been used, then if the marker to found has been detect the distance between it's center and the camera center and the dimension of pixel of the side of the marker are computed. To comunicate with the navlog Node a custom message is published containing, the id of the marker found, an ack, the size of the side and the distance between centers. 
 
 ```    cpp
-Inclue needed library
+Include needed library
 Define a MarkerDetector Class {
     Initialize variable for aruco marker detection (detector, marker size, camera parameter), CV image,  
     Initialize publishers and subscriber
@@ -290,7 +290,7 @@ Main:
 This node is the one publishing the rotation of the camera with respect to the body frame, this rotatation will be used by the navlog to make the rosbot and camera align. To get this rotation the functionality provided by transform are used, in particular the lookupTransform, which given the name of the two reference frame returns the transformation matrix among them. From the transformation matrix between the body and the camera frame the rotation around z (yaw) is obtained.
 
 ```    cpp
-Inclue needed library
+Include needed library
 Define a geometry NOde Class {
     initialize variable for Transform matrices
     initialize publisher and ros timer
@@ -344,17 +344,9 @@ https://github.com/giuliab00/experimental_1/assets/114082533/bd02b73e-6956-45aa-
 
 
 
-Here it is possible to find a video showing the behaviour of the simulation with a fixed camera
-
-
-
-https://github.com/giuliab00/experimental_1/assets/114100814/c17ca7f1-98aa-44b7-9c01-f45f4e1ba004
-
-
-
 Simulation VS Real World
 -------------------------
-The main difference between the two implementation are:
+The main differences between the two implementations are:
 * The addition of the geometry Node to know ho wthe camera is rotate
 * the modification of the rosbot model in order to have the rotating camera and controlling it
 * The change of topic to look in markerDetector depending on the simulation or the real rosbot
