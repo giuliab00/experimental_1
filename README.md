@@ -8,7 +8,7 @@ How to download
 
 In order to run the solution it is necessary to have the following ROS package:
 
-* OpenCV: that must be the same version of your ros, in our case noetict If you are downloading on the rosbot you don't need it since it's already there.
+* OpenCV: that must be the same version of your ROS, in our case noetict. If you are going to run the package on the rosbot you don't need it since it's already there.
 
 ```bash
 git clone https://github.com/ros-perception/vision_opencv
