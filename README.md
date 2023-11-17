@@ -10,13 +10,13 @@ How to download
 
 In order to run the solution it is necessary to have the following ROS package:
 
-OPEN CV: that must be the same version of your ros, in our case noetict If you are downloading on the rosbot you don't need it since it's already there.
+* OpenCV: that must be the same version of your ros, in our case noetict If you are downloading on the rosbot you don't need it since it's already there.
 
 ```bash
 git clone https://github.com/ros-perception/vision_opencv
 git checkout noetic
 ```
-ArUco ROS in order to have the models of the marker in the simulation and all the libraries provided by Aruco to recognize the markers. The following is for ROS noetic
+* ArUco: in order to have the models of the marker in the simulation and all the libraries provided by Aruco to recognize the markers. The following is for ROS noetic
 ```bash
 git clone https://github.com/CarmineD8/aruco_ros
 ```
@@ -28,7 +28,7 @@ git clone https://github.com/pal-robotics/aruco_ros
 git checkout melodic-devel
 ```
 
-For the simulation with the fixed camera is important to have the model of the rosbot. This can be obtained with the following lines. Once again remember to branch to the correnct implemnation for your ROS version.
+* Rosbot: For the simulation with the fixed camera is important to have the model of the rosbot. This can be obtained with the following lines. Once again remember to branch to the correnct implementation for your ROS version.
 ```bash
 git clone https://github.com/husarion/rosbot_ros
 git checkout noetic
@@ -40,8 +40,8 @@ git clone https://github.com/giuliab00/experimental_1
 ```
 
 It contains two branches:
-* main one for the rosbot and the implentation with the fixed camera. 
-* simulation for the simulation with the rotating camera. 
+* **main**: for the rosbot and the implentation with the fixed camera. 
+* **simulation** for the simulation with the rotating camera. 
 
 So rember to branch on the interessed one.
 
@@ -59,14 +59,15 @@ If you want to run the package with the rosbot there are two possible way:
 To run the code in both case just execute this command on the bash :
 
 ```bash
-rosrun experimental_1 laboratorium.launch
+roslaunch experimental_1 laboratorium.launch
 ```
 
 The two nodes are now running and the rosbot will start looking for marker and reach them.
 
 ### Architecture and Pseudocode
 In order to achieve the solution it has been thought of the following architecture:\
-![architechture1](https://github.com/giuliab00/experimental_1/blob/main/photo_5958566034669681941_y.jpg)
+![architecture 1](https://github.com/giuliab00/experimental_1/assets/114082533/d2a204b4-cba2-49c8-89d2-11cba2d59665)
+
 
 There are two node: the **navlog** Node that is the one in charge of controlling the behaviour of the rosbot and the **marker Detecor** Node that is the one in charge of recognizing the markers. Now let's see in the detail how this work and the main differences with the Simulation with rotating camera.  
 
@@ -136,7 +137,7 @@ Main:
 This node is the one recognizing marker and computing the values to tell the navlog about the distance between the rosbot and the marker. To detect the marker the ArUco marker detector has been used, then if the marker to found has been detect the distance between it's center and the camera center and the dimension of pixel of the side of the marker are computed. To comunicate with the navlog Node a custom message is published containing, the id of the marker found, an ack, the size of the side and the distance between centers. 
 
 ```    cpp
-Inclue needed library
+Include needed library
 Define a MarkerDetector Class {
     Initialize variable for aruco marker detection (detector, marker size, camera parameter), CV image,  
     Initialize publishers and subscriber
@@ -189,6 +190,10 @@ main(){
 ### Video
 Here it is possible to find the video showing the rosbot in action.
 
+
+https://github.com/giuliab00/experimental_1/assets/114082533/557a6603-cb2d-4cb0-8ea1-5774017435cc
+
+
 As seen in the video the rosbot is a little slow but this can be adjust by modifying the values of the velocity variables initialized in the navlog node.
 
 SIMULATION with rotating Camera
@@ -209,9 +214,9 @@ sudo apt-get install xterm
 ### Architecture and Pseudocode
 
 In order to achieve the solution it has been thought of the following architecture:\
-![architechture2](https://github.com/giuliab00/experimental_1/blob/main/photo_5958566034669681942_y.jpg)
+![architecture2](https://github.com/giuliab00/experimental_1/assets/114082533/bf7abbab-11e5-4ba6-a6c7-73cadecccda3)
 
-Substuntially with respect to the previous the **navlog** node and the  **markerDetector** node have the same behaviour and the **geometry** node is added and is the one in charge of computing the misalignmnet between the camera and the body frame.
+In this case the **geometry** node is added to the previous architecture and is the the one in charge of computing the misalignmnet between the camera and the body frame. Regarding the **navlog** node and the **markerDetector** node they have the same behaviour as before. The **navlog** Node that is the one in charge of controlling the behaviour of the rosbot and the **marker Detecor** Node that is the one in charge of recognizing the markers.
 
 #### Modification to make the camera rotate
 To make the camera rotate with respect to the body some modification have been made:
@@ -284,7 +289,7 @@ Main:
 This node is the one publishing the rotation of the camera with respect to the body frame, this rotatation will be used by the navlog to make the rosbot and camera align. To get this rotation the functionality provided by transform are used, in particular the lookupTransform, which given the name of the two reference frame returns the transformation matrix among them. From the transformation matrix between the body and the camera frame the rotation around z (yaw) is obtained.
 
 ```    cpp
-Inclue needed library
+Include needed library
 Define a geometry NOde Class {
     initialize variable for Transform matrices
     initialize publisher and ros timer
@@ -327,17 +332,20 @@ main(){
 ```
 
 #### markerDetector Node
-This node is the one recognizing marker and computing the values to tell the navlog about the distance between the rosbot and the marker. It's behaviour it's the same as the one implemented to run on the rosbot the main difference is the topic to get the camera images that is *"/camera/color/image_raw"* for the simulation and *"/camera/rgb/image_raw"*
+This node is the one recognizing marker and computing the values to tell the navlog about the distance between the rosbot and the marker. It's behaviour it's the same as the one implemented to run on the rosbot the main difference is the topic to get the camera images that is *"/camera/color/image_raw"* for the simulation and *"/camera/rgb/image_raw"* for the rosbot.
 
 ### Video
 Here it is possible to find the video showing the behaviour in the simulation with the rotating camera
 
-Here it is possible to find a video showing the behaviour of the simulation with a fixed camera
-https://github.com/giuliab00/experimental_1/assets/114100814/c17ca7f1-98aa-44b7-9c01-f45f4e1ba004
+
+
+https://github.com/giuliab00/experimental_1/assets/114082533/bd02b73e-6956-45aa-b1c5-8841b2ffd713
+
+
 
 Simulation VS Real World
 -------------------------
-The main difference between the two implementation are:
+The main differences between the two implementations are:
 * The addition of the geometry Node to know ho wthe camera is rotate
 * the modification of the rosbot model in order to have the rotating camera and controlling it
 * The change of topic to look in markerDetector depending on the simulation or the real rosbot
@@ -348,7 +356,7 @@ Drawback and Possible improvements
 -------------------------
 There are different improvement regarding both the simulation and the real rosbot.
 
-Regarding the simultaion one main problem was the detection of marker 12 after reaching marker 11 due to the shadow of the gray boxes. To overcome this problem the rosbot take a step back after reaching each marker in our implementaion. Another solutionis to change the color of the boxes in the simulation to be withe in this way the robot detect the marker without any problem because the shadow are not so dark anymore and make the square of the marker recognizible.
+Regarding the simultaion one main problem was the detection of marker 12 after reaching marker 11 due to the shadow of the gray boxes. To overcome this problem we change the color of the boxes in the simulation to be white in this way the robot detect the marker easier because the shadow are not so dark anymore and make the square of the marker recognizible. Another solution could be to make the robot take a step back after reaching each marker. To be even more precise combining the two tecniques could be a good idea.
 
 The simulation with the fixed camera has been developed in an initial phase of the project but right now no launch file is provided to see it. But can be easily obtained in the main function by launch a simulation with the standard rosbot model provided by huarison and the same node used by the real robot by remapping the topic look by the markerDetecor to the one of the simulation. 
 
