@@ -332,7 +332,7 @@ main(){
 ```
 
 #### markerDetector Node
-This node is the one recognizing marker and computing the values to tell the navlog about the distance between the rosbot and the marker. It's behaviour it's the same as the one implemented to run on the rosbot the main difference is the topic to get the camera images that is *"/camera/color/image_raw"* for the simulation and *"/camera/rgb/image_raw"*
+This node is the one recognizing marker and computing the values to tell the navlog about the distance between the rosbot and the marker. It's behaviour it's the same as the one implemented to run on the rosbot the main difference is the topic to get the camera images that is *"/camera/color/image_raw"* for the simulation and *"/camera/rgb/image_raw"* for the rosbot.
 
 ### Video
 Here it is possible to find the video showing the behaviour in the simulation with the rotating camera
