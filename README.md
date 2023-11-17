@@ -3,8 +3,6 @@ Assignment 1 of Experimental Robotics Laboratory
 
 The goal of this assignment is to work with a rosbot by moving it in the environment to find and reach 4 different Aruco markers. This has been done firstly in a simulation environment using gazebo and a rosbot with a fixed camera, then this behaviour has been tested and modified a little to work with a real rosbot in the laboratorium. Lastly in the simulation the model of the robot has been modified in order to have a rosbot with a rotating camera in the simulation.
 
-Here is explained in detail the behaviour of the algorithms, while at the end of this document it is possible to find the differences between the the real robot implementation and the simulation.
-
 How to download
 ----------------------
 
