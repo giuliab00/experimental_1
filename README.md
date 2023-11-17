@@ -67,7 +67,7 @@ In order to achieve the solution it has been thought of the following architectu
 ![architecture 1](https://github.com/giuliab00/experimental_1/assets/114082533/d2a204b4-cba2-49c8-89d2-11cba2d59665)
 
 
-There are two node: the **navlog** Node that is the one in charge of controlling the behaviour of the rosbot and the **marker Detecor** Node that is the one in charge of recognizing the markers. Now let's see in the detail how this work and the main differences with the Simulation with rotating camera.  
+There are two node: the **navlog** Node that is the one in charge of controlling the behaviour of the rosbot and the **markerDetecor** Node that is the one in charge of recognizing the markers. Now let's see in the detail how this work and the main differences with the Simulation with rotating camera.  
 
 #### navlog Node
 The NavLog Node is the one in charge of controlling the behaviour of the robot by publishing the ID of the marker to found, make the rosbot rotate until the marker isn't found. Once the marker is found it makes the rosbot align to the ceneter of marker and go forward to reach it. This behaviour have been implemented in a python script (found in the scripts folder with the name nav2.py).
