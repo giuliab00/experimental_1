@@ -216,8 +216,7 @@ sudo apt-get install xterm
 In order to achieve the solution it has been thought of the following architecture:\
 ![architecture2](https://github.com/giuliab00/experimental_1/assets/114082533/bf7abbab-11e5-4ba6-a6c7-73cadecccda3)
 
-
-Substuntially with respect to the previous the **navlog** node and the  **markerDetector** node have the same behaviour and the **geometry** node is added and is the one in charge of computing the misalignmnet between the camera and the body frame.
+In this case the **geometry** node is added to the previous architecture and is the the one in charge of computing the misalignmnet between the camera and the body frame. Regarding the **navlog** node and the **markerDetector** node they have the same behaviour as before. The **navlog** Node that is the one in charge of controlling the behaviour of the rosbot and the **marker Detecor** Node that is the one in charge of recognizing the markers.
 
 #### Modification to make the camera rotate
 To make the camera rotate with respect to the body some modification have been made:
