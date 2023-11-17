@@ -3,14 +3,12 @@ Assignment 1 of Experimental Robotics Laboratory
 
 The goal of this assignment is to work with a rosbot by moving it in the environment to find and reach 4 different Aruco markers. This has been done firstly in a simulation environment using gazebo and a rosbot with a fixed camera, then this behaviour has been tested and modified a little to work with a real rosbot in the laboratorium. Lastly in the simulation the model of the robot has been modified in order to have a rosbot with a rotating camera in the simulation.
 
-Here is explained in detail the behaviour of the algorithms, while at the end of this document it is possible to find the differences between the the real robot implementation and the simulation.
-
 How to download
 ----------------------
 
 In order to run the solution it is necessary to have the following ROS package:
 
-* OpenCV: that must be the same version of your ros, in our case noetict If you are downloading on the rosbot you don't need it since it's already there.
+* OpenCV: that must be the same version of your ROS, in our case noetict. If you are going to run the package on the rosbot you don't need it since it's already there.
 
 ```bash
 git clone https://github.com/ros-perception/vision_opencv
@@ -69,10 +67,10 @@ In order to achieve the solution it has been thought of the following architectu
 ![architecture 1](https://github.com/giuliab00/experimental_1/assets/114082533/d2a204b4-cba2-49c8-89d2-11cba2d59665)
 
 
-There are two node: the **navlog** Node that is the one in charge of controlling the behaviour of the rosbot and the **marker Detecor** Node that is the one in charge of recognizing the markers. Now let's see in the detail how this work and the main differences with the Simulation with rotating camera.  
+There are two node: the **navlog** Node that is the one in charge of controlling the behaviour of the rosbot and the **markerDetecor** Node that is the one in charge of recognizing the markers. Now let's see in the detail how this nodes work.  
 
 #### navlog Node
-The NavLog Node is the one in charge of controlling the behaviour of the robot by publishing the ID of the marker to found, make the rosbot rotate until the marker isn't found. Once the marker is found it makes the rosbot align to the ceneter of marker and go forward to reach it. This behaviour have been implemented in a python script (found in the scripts folder with the name nav2.py).
+The NavLog Node is the one in charge of controlling the behaviour of the robot by publishing the ID of the marker to found, making the rosbot rotate until the marker isn't found. Once the marker is found it makes the rosbot align to the ceneter of marker and go forward to reach it. This behaviour has been implemented in a python script (found in the scripts folder with the name nav2.py).
 
 ```python
 
@@ -121,7 +119,7 @@ Define a class for navigation-logic:
             Until the marker is not reached:
                 Iterate the control
         When finished, the robot spins
-        notify markerDetecto to finish
+        Notify markerDetecto to finish
 
 Main:
     
@@ -129,12 +127,12 @@ Main:
     Create and spin the controller node
     Spinning thread to ensure that ROS callbacks are executed
     Start the logic node routine
-    shutdown the node
+    Shutdown the node
 
 ```
 
 #### markerDetector Node
-This node is the one recognizing marker and computing the values to tell the navlog about the distance between the rosbot and the marker. To detect the marker the ArUco marker detector has been used, then if the marker to found has been detect the distance between it's center and the camera center and the dimension of pixel of the side of the marker are computed. To comunicate with the navlog Node a custom message is published containing, the id of the marker found, an ack, the size of the side and the distance between centers. 
+This node is the one recognizing marker and computing the values to tell the navlog about the distance between the rosbot and the marker. To detect the marker the ArUco marker detector has been used, then if the marker to found has been detect the distance between the marker center and the camera center and the dimension of pixel of the side of the marker are computed. To comunicate with the navlog Node a custom message is published containing, the id of the marker found, an ack, the size of the side and the distance between centers. This node has been implemneted in c++ due to the ArUco library be mainl written in c++.  (found in the src folder with the name markerDetctor.cpp)
 
 ```    cpp
 Include needed library
@@ -159,7 +157,7 @@ Define a MarkerDetector Class {
                     pusblish(msg)
                 }
             }
-            Visualize Camera POV 
+            visualize Camera POV 
         }
         catch{
             error
@@ -196,7 +194,7 @@ https://github.com/giuliab00/experimental_1/assets/114082533/557a6603-cb2d-4cb0-
 
 As seen in the video the rosbot is a little slow but this can be adjust by modifying the values of the velocity variables initialized in the navlog node.
 
-SIMULATION with rotating Camera
+SIMULATION - rotating camera
 ------------------------------------
 
 ### How to run the solution
@@ -207,6 +205,7 @@ If you have followed the previous steps, and are in the simulation branch it is 
 roslaunch experimental_1 run.launch
 ```
 to properly execute the launch file it's important to have xterm because it allows to have each node in a single window and see clearly the output of each node. To download xterm write this line on your terminal
+
 ```bash
 sudo apt-get install xterm
 ```
@@ -216,18 +215,18 @@ sudo apt-get install xterm
 In order to achieve the solution it has been thought of the following architecture:\
 ![architecture2](https://github.com/giuliab00/experimental_1/assets/114082533/bf7abbab-11e5-4ba6-a6c7-73cadecccda3)
 
-In this case the **geometry** node is added to the previous architecture and is the the one in charge of computing the misalignmnet between the camera and the body frame. Regarding the **navlog** node and the **markerDetector** node they have the same behaviour as before. The **navlog** Node that is the one in charge of controlling the behaviour of the rosbot and the **marker Detecor** Node that is the one in charge of recognizing the markers.
+In this case the **geometry** Node is added to the previous architecture and is the the one in charge of computing the misalignmnet between the camera and the body frame. Regarding the **navlog** Node and the **markerDetector** Node they have the same behaviour as before: **navlog** Node that is the one in charge of controlling the behaviour of the rosbot and **markerDetecor** Node that is the one in charge of recognizing the markers.
 
 #### Modification to make the camera rotate
 To make the camera rotate with respect to the body some modification have been made:
 * Firstly the urdf of the rosbot need to be changed in particular the rosbot.xacro and the rosbot.gazebo file :
-    * rosbot.xacro: the joint connecting the camera to the body wich by default is fixed need to be continuos to allow a rotation. Then to motorize this joint a trasmission need to be add;
-    * rosbot.gazebo : here the plug in for the control of the motorize joint is added;
-* Then in the joint_state_controller.yaml in the config folder the controller for the camera using a PD controller is added;
+    * *rosbot.xacro*: the joint connecting the camera to the body wich by default is fixed need to be continuos to allow a rotation. Then to motorize this joint a trasmission need to be add;
+    * *rosbot.gazebo* : here the plug in for the control of the motorize joint is added;
+* Then in the *joint_state_controller.yaml* in the config folder the controller for the camera using a PD controller is added;
 * Lastly in the launch file the controller must be called and when the spawner node is called in it's args also the new controller need to be provided.
 
 #### navlog Node
-As said before the NavLog Node is the one in charge of controlling the behaviour of the robot by publishing the ID of the marker to found, make the camera rotate until the marker isn't found. Once the marker is found it makes the camera align with the body and the center of the marker and then reach the marker on a straight line. This behaviou have been implemented in a python script (found in the scripts folder with the name nav2.py).
+As said before the navlog Node is the one in charge of controlling the behaviour of the robot by publishing the ID of the marker to found, make the camera rotate until the marker isn't found. Once the marker is found it makes the camera align with the body and the center of the marker and then reach the marker on a straight line. This behaviour have been implemented in a python script (foundable in the scripts folder with the name nav2.py).
 
 ```python
 
@@ -239,7 +238,7 @@ Define a class for navlog Node:
     
     Initialize publishers and subscribers
 
-    search_marker function:
+    Search_marker function:
         while( marker not found):
             send command to rotate camera
         stop camera
@@ -273,8 +272,8 @@ Define a class for navlog Node:
                 rosbot go forward
             Stop rosbot
             Set to 0 ack, distance and marker to found
-        When finished, the robot spins 
-        Then stop
+       	Stop
+	Notify markerDetector to finish
 
 Main:
     
@@ -286,7 +285,7 @@ Main:
 
 ```
 #### geometry Node
-This node is the one publishing the rotation of the camera with respect to the body frame, this rotatation will be used by the navlog to make the rosbot and camera align. To get this rotation the functionality provided by transform are used, in particular the lookupTransform, which given the name of the two reference frame returns the transformation matrix among them. From the transformation matrix between the body and the camera frame the rotation around z (yaw) is obtained.
+This node is the one publishing the rotation of the camera with respect to the body frame, this rotatation will be used by the navlog to make the rosbot and camera align. To get this rotation the functionality provided by ROS transform are used, in particular the lookupTransform, which given the name of the two reference frame returns the transformation matrix among them. From the transformation matrix between the body and the camera frame the rotation around z (yaw) is obtained and published to notify the misalignment. (foundable in the src folder with the name geometryNode.cpp)
 
 ```    cpp
 Include needed library
@@ -332,7 +331,7 @@ main(){
 ```
 
 #### markerDetector Node
-This node is the one recognizing marker and computing the values to tell the navlog about the distance between the rosbot and the marker. It's behaviour it's the same as the one implemented to run on the rosbot the main difference is the topic to get the camera images that is *"/camera/color/image_raw"* for the simulation and *"/camera/rgb/image_raw"* for the rosbot.
+This node is the one recognizing marker and computing the values to tell the navlog about the distance between the rosbot and the marker. It's behaviour it's the same as the one implemented to run on the rosbot the main difference is the topic to get the camera images that is *"/camera/color/image_raw"* for the simulation and *"/camera/rgb/image_raw"* for the rosbot.  (foundable in the src folder with the name markerDetector.cpp)
 
 ### Video
 Here it is possible to find the video showing the behaviour in the simulation with the rotating camera
@@ -364,3 +363,4 @@ One interesting improvements will be to use transformation matrix to know the po
 
 Regarding the control would be also interesting to se a control proportional to the error, so that the rosbot will go faster when is distant and slower once it almost reach the marker.
 
+Lastly to increase the modularity could be possible to separate the Navigation Node from the Logic Node by splitting the navlog Node. Then for the simulation with the control on the camera and the control of the rosbot can be developed in two different node. In this case for the communication among this new nodes new message, service or action will be required.
